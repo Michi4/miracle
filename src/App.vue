@@ -359,25 +359,13 @@ onMounted(()=>{
   // codepen disco ball - exact https://codepen.io/msaetre/pen/eYwqrb - no flicker (static tiles, smooth spin)
   // codepen disco ball - exact for Chrome, CSS fallback for Firefox (no flicker)
   var isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1
+  var discoWrap = document.getElementById('discoWrap')
+  if(discoWrap && isFirefox){
+    discoWrap.style.display = 'none'
+  }
   var discoBall=document.getElementById('discoBall')
-  if(discoBall){
-    if(isFirefox){
-      // Firefox: simple CSS gradient circle, no 3D, no flicker
-      discoBall.innerHTML = ''
-      discoBall.style.background = 'radial-gradient(circle at 35% 35%, #e8e8e8, #b0b0b0 25%, #808080 50%, #555 75%, #333 100%)'
-      discoBall.style.borderRadius = '50%'
-      discoBall.style.border = '3px solid #222'
-      discoBall.style.boxShadow = '0 16px 40px rgba(0,0,0,0.35), inset 0 8px 20px rgba(255,255,255,0.5), inset 0 -12px 24px rgba(0,0,0,0.35)'
-      discoBall.style.width = '100px'
-      discoBall.style.height = '100px'
-      discoBall.style.position = 'absolute'
-      discoBall.style.top = '88px'
-      discoBall.style.left = '50%'
-      discoBall.style.marginLeft = '-50px'
-      discoBall.style.animation = 'rotateDiscoBall 18s linear infinite'
-      // no middle or tiles needed
-    } else {
-      // Chrome/Safari: full codepen 3D sphere
+  if(discoBall && !isFirefox){
+    // Chrome/Safari: full codepen 3D sphere
       var radius=50, squareSize=7, prec=14, fuzzy=0.001
       var inc=(Math.PI-fuzzy)/prec
       for(var tt=fuzzy; tt<Math.PI; tt+=inc){
@@ -403,7 +391,6 @@ onMounted(()=>{
           discoBall.appendChild(square)
         }
       }
-    }
   }
 })
 </script>
