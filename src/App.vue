@@ -133,11 +133,11 @@
 
           <!-- next gig ticket - perfect - narrower -->
           <div class="lg:col-span-6 lg:col-start-7 bg-black text-white rounded-[28px] p-0 flex flex-col overflow-hidden border-[2.5px] border-black shadow-[8px_8px_0px_#000] rotate-[0.3deg] h-full">
-            <div class="p-6 relative overflow-hidden">
+            <div class="p-6 lg:p-7 relative overflow-hidden flex-1 flex flex-col justify-center">
               <div class="absolute inset-0 opacity-[0.12]" style="background: radial-gradient(500px 250px at 90% 0%, #FF3B2F, transparent), radial-gradient(400px 300px at 0% 100%, #5B6BFF, transparent)"></div>
-              <div class="relative inline-flex items-center gap-2 mono text-[10px] tracking-[0.18em] bg-[#FFD23F] text-black px-3 py-1 rounded-full font-bold">{{ nextGigLabel }}</div>
-              <div class="relative instrument text-[28px] leading-[0.9] mt-3">{{ nextGig.place }}<br><span class="text-[#FFD23F] italic">{{ nextGig.city }}</span></div>
-              <div class="relative mono text-xs opacity-60 mt-1">{{ nextGig.note }}</div>
+              <div class="relative inline-flex items-center gap-2 mono text-[10px] tracking-[0.18em] bg-[#FFD23F] text-black px-3 py-1 rounded-full font-bold w-fit">{{ nextGigLabel }}</div>
+              <div class="relative instrument text-[28px] lg:text-[34px] leading-[0.9] mt-3">{{ nextGig.place }}<br><span class="text-[#FFD23F] italic">{{ nextGig.city }}</span></div>
+              <div class="relative mono text-xs opacity-60 mt-2">{{ nextGig.note }}</div>
             </div>
             <div class="relative flex items-center justify-between bg-white text-black px-6 py-3 border-t-[2.5px] border-black border-dashed">
               <span class="mono text-[11px] tracking-widest font-bold">EINTRITT FREI</span>
