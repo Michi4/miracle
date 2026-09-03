@@ -1,0 +1,25 @@
+@import "tailwindcss";
+
+* {
+  scrollbar-width: none;
+}
+*::-webkit-scrollbar { display: none; }
+
+html.lenis, html.lenis body { height: auto; }
+.lenis.lenis-smooth { scroll-behavior: auto !important; }
+.lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
+.lenis.lenis-stopped { overflow: hidden; }
+
+body {
+  background: #FFFCF5;
+  color: #0B0B0D;
+  font-family: "Space Grotesk", system-ui, sans-serif;
+  overflow-x: hidden;
+  overscroll-behavior: none;
+}
+
+::selection { background: #FF2E1F; color: #FFFCF5; }
+
+.instrument { font-family: "Instrument Serif", serif; }
+.syne { font-family: "Syne", sans-serif; }
+.mono { font-family: "JetBrains Mono", monospace; }
