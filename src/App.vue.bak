@@ -82,7 +82,9 @@
   <div id="discoWrap" class="absolute top-0 left-1/2 -translate-x-1/2 z-30 pointer-events-auto flex flex-col items-center cursor-grab active:cursor-grabbing" style="transform-origin: top center; animation: swing 3.4s ease-in-out infinite;">
     <div class="w-px h-[88px] bg-neutral-800 mx-auto" style="width:1px;"></div>
     <div id="discoBallLight" style="top: 88px;"></div>
-    <div id="discoBall" style="top: 88px;"><div id="discoBallMiddle"></div></div>
+    <div id="discoBall" style="top: 88px; width: 100px; height: 100px; position: absolute; left: 50%; margin-left: -50px; animation: rotateDiscoBall 30s linear infinite; transform-style: preserve-3d; will-change: transform; backface-visibility: hidden;">
+      <canvas id="discoCanvas" width="100" height="100" style="width:100px;height:100px;"></canvas>
+    </div>
   </div>
 
   <main class="relative">
@@ -357,53 +359,43 @@ onMounted(()=>{
   if(blob3.value) gsap.to(blob3.value,{x:8,y:12,duration:3.2,yoyo:true,repeat:-1,ease:'sine.inOut',delay:0.5})
   // disco ball - exact https://codepen.io/msaetre/pen/eYwqrb - perfect with light background
   // codepen disco ball - exact https://codepen.io/msaetre/pen/eYwqrb - no flicker (static tiles, smooth spin)
-  // codepen disco ball - exact for Chrome, CSS fallback for Firefox (no flicker)
-  var isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1
-  var discoBall=document.getElementById('discoBall')
-  if(discoBall){
-    if(isFirefox){
-      // Firefox: simple CSS gradient circle, no 3D, no flicker
-      discoBall.innerHTML = ''
-      discoBall.style.background = 'radial-gradient(circle at 35% 35%, #e8e8e8, #b0b0b0 25%, #808080 50%, #555 75%, #333 100%)'
-      discoBall.style.borderRadius = '50%'
-      discoBall.style.border = '3px solid #222'
-      discoBall.style.boxShadow = '0 16px 40px rgba(0,0,0,0.35), inset 0 8px 20px rgba(255,255,255,0.5), inset 0 -12px 24px rgba(0,0,0,0.35)'
-      discoBall.style.width = '100px'
-      discoBall.style.height = '100px'
-      discoBall.style.position = 'absolute'
-      discoBall.style.top = '88px'
-      discoBall.style.left = '50%'
-      discoBall.style.marginLeft = '-50px'
-      discoBall.style.animation = 'rotateDiscoBall 18s linear infinite'
-      // no middle or tiles needed
-    } else {
-      // Chrome/Safari: full codepen 3D sphere
-      var radius=50, squareSize=7, prec=14, fuzzy=0.001
-      var inc=(Math.PI-fuzzy)/prec
-      for(var tt=fuzzy; tt<Math.PI; tt+=inc){
-        var z=radius*Math.cos(tt)
-        var curR=Math.abs((radius*Math.cos(0)*Math.sin(tt))-(radius*Math.cos(Math.PI)*Math.sin(tt)))/2.5
-        var circ=Math.abs(2*Math.PI*curR)
-        var fit=Math.floor(circ/squareSize)
-        var angInc=(Math.PI*2-fuzzy)/fit
-        for(var i=angInc/2+fuzzy;i<(Math.PI*2);i+=angInc){
-          var square=document.createElement('div')
-          var tile=document.createElement('div')
-          tile.style.width=squareSize+'px'; tile.style.height=squareSize+'px'
-          tile.style.transformOrigin='0 0 0'
-          tile.style.transform='rotate('+i+'rad) rotateY('+tt+'rad)'
-          var bright=(tt>1.3&&tt<1.9)
-          var rnd=Math.random()
-          var c = bright ? 200+Math.floor(rnd*55) : 150+Math.floor(rnd*85)
-          tile.style.backgroundColor='rgb('+c+','+c+','+c+')'
-          tile.style.backfaceVisibility='hidden'
-          square.appendChild(tile); square.className='square'
-          var x=radius*Math.cos(i)*Math.sin(tt), y=radius*Math.sin(i)*Math.sin(tt)
-          square.style.transform='translateX('+x+'px) translateY('+y+'px) translateZ('+z+'px)'
-          discoBall.appendChild(square)
-        }
-      }
+  // canvas disco ball - single element, no flicker, works everywhere
+  var canvas = document.getElementById('discoCanvas')
+  if(canvas){
+    var ctx = canvas.getContext('2d')
+    var cx = 50, cy = 50, r = 45
+    // draw sphere once
+    for(var i = 0; i < 400; i++){
+      // random position on sphere surface
+      var theta = Math.random() * Math.PI * 2
+      var phi = Math.acos(2 * Math.random() - 1)
+      var x = cx + r * Math.sin(phi) * Math.cos(theta)
+      var y = cy + r * Math.sin(phi) * Math.sin(theta)
+      var z = r * Math.cos(phi)
+      // project to 2D with perspective (z depth -> size)
+      var depth = (z + r) / (2 * r) // 0-1, front=1 back=0
+      var size = 1.5 + depth * 4.5 // front tiles bigger
+      var brightness = 120 + Math.floor(depth * 100) + Math.floor(Math.random() * 40)
+      ctx.beginPath()
+      ctx.arc(x, y, size/2, 0, Math.PI * 2)
+      ctx.fillStyle = 'rgb('+brightness+','+brightness+','+brightness+')'
+      ctx.fill()
     }
+    // gloss overlay
+    var grad = ctx.createRadialGradient(32, 32, 5, 40, 40, 50)
+    grad.addColorStop(0, 'rgba(255,255,255,0.2)')
+    grad.addColorStop(0.5, 'rgba(255,255,255,0.05)')
+    grad.addColorStop(1, 'rgba(255,255,255,0)')
+    ctx.fillStyle = grad
+    ctx.beginPath()
+    ctx.arc(cx, cy, r, 0, Math.PI * 2)
+    ctx.fill()
+    // border
+    ctx.strokeStyle = '#222'
+    ctx.lineWidth = 2
+    ctx.beginPath()
+    ctx.arc(cx, cy, r, 0, Math.PI * 2)
+    ctx.stroke()
   }
 })
 </script>
@@ -420,11 +412,9 @@ html { scroll-behavior: auto; }
 .paper::after{content:"";position:absolute;inset:0;background-image:url("data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22><filter id=%22n%22><feTurbulence baseFrequency=%220.9%22/></filter><rect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23n)%22 opacity=%220.015%22/></svg>");pointer-events:none;opacity:0.6}
 .mono{font-family:"JetBrains Mono",monospace}
 html{width:100%;height:100%}
-#discoBall{transform-style:preserve-3d;width:100px;height:100px;position:absolute;top:50px;left:50%;margin-left:-50px;animation:rotateDiscoBall 24s linear infinite;will-change:transform;backface-visibility:hidden}
-.square{transform-style:preserve-3d;position:absolute;top:50px;left:50px;width:6px;height:6px;will-change:transform}
-#discoBallMiddle{height:100%;border-radius:100%;background-color:#222;position:absolute;background:linear-gradient(to top,#222,#444);animation:rotateDiscoBallMiddle 24s linear infinite;will-change:transform}
+#discoBall{width:100px;height:100px;position:absolute;left:50%;margin-left:-50px;animation:rotateDiscoBall 18s linear infinite;backface-visibility:hidden;will-change:transform}
 @media(max-width:768px){#discoBall{width:70px;height:70px;margin-left:-35px} #discoBallLight{width:70px;height:70px;margin-left:-35px}}
-#discoBallLight{width:100px;height:100px;position:absolute;top:50px;left:50%;margin-left:-50px;border-radius:100%;background-color:white;opacity:0.2;filter:blur(20px)}
+#discoBallLight{width:100px;height:100px;position:absolute;top:50px;left:50%;margin-left:-50px;border-radius:100%;background-color:white;opacity:0.15;filter:blur(18px)}
 
 
 @keyframes swing{0%{transform:translateX(-50%) rotate(-2deg)}50%{transform:translateX(-50%) rotate(2deg)}100%{transform:translateX(-50%) rotate(-2deg)}}
@@ -432,8 +422,7 @@ html{width:100%;height:100%}
 @keyframes swingStaff{0%{transform:rotate(-1.5deg)}50%{transform:rotate(1.5deg)}100%{transform:rotate(-1.5deg)}}
 @keyframes waveFlag{0%{transform: skewY(0deg) translateX(0px)}25%{transform: skewY(0.8deg) translateX(1px)}50%{transform: skewY(-0.6deg) translateX(-1px)}75%{transform: skewY(0.5deg) translateX(0.5px)}100%{transform: skewY(0deg) translateX(0px)}}
 @keyframes bob{0%{transform:translateX(-50%) translateY(0px)}50%{transform:translateX(-50%) translateY(4px)}100%{transform:translateX(-50%) translateY(0px)}}
-@keyframes rotateDiscoBall{0%{transform:rotateX(90deg) rotateZ(0deg)}100%{transform:rotateX(90deg) rotateZ(360deg)}}
-@keyframes rotateDiscoBallMiddle{0%{transform:rotateX(90deg) rotateY(0deg)}100%{transform:rotateX(90deg) rotateY(-360deg)}}
+@keyframes rotateDiscoBall{0%{transform:rotateZ(0deg)}100%{transform:rotateZ(360deg)}}
 
 @keyframes rotateDiscoBallMiddle{0%{transform:rotateX(90deg) rotateY(0deg)}100%{transform:rotateX(90deg) rotateY(-360deg)}}
 
