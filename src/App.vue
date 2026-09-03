@@ -65,7 +65,7 @@
     </div>
   </div>
 
-  <nav ref="nav" class="fixed top-4 left-1/2 -translate-x-1/2 z-40 flex items-center gap-1.5 px-2 py-2 rounded-full bg-black text-white mono text-[11px] tracking-widest opacity-0 shadow-[0_12px_40px_rgba(0,0,0,0.25)]">
+  <nav ref="nav" class="fixed top-4 left-1/2 -translate-x-1/2 z-40 hidden md:flex items-center gap-1.5 px-2 py-2 rounded-full bg-black text-white mono text-[11px] tracking-widest opacity-0 shadow-[0_12px_40px_rgba(0,0,0,0.25)]">
     <a href="#about" :class="active==='about' ? 'bg-white text-black' : 'hover:bg-white hover:text-black'" class="px-4 py-1.5 rounded-full transition">{{ isDe ? 'ÜBER UNS' : 'ABOUT' }}</a>
     <a href="#music" :class="active==='music' ? 'bg-white text-black' : 'hover:bg-white hover:text-black'" class="px-4 py-1.5 rounded-full transition">REELS</a>
     <a href="#live" :class="active==='live' ? 'bg-white text-black' : 'hover:bg-white hover:text-black'" class="px-4 py-1.5 rounded-full transition">LIVE</a>
@@ -103,6 +103,12 @@
         <!-- perfect hero cards: 2 clean cards for Hannah & Sophie + next gig ticket - all original, no 19 -->
         <div class="grid lg:grid-cols-12 gap-4 mt-6 max-w-[1400px] items-stretch" style="animation: fadeInUp 0.8s ease-out;">
           <div class="lg:col-span-5 flex flex-col gap-4 h-full">
+            <a href="https://www.instagram.com/miracleechoes/" target="_blank" class="group bg-[#FFD23F] border-[2.5px] border-black rounded-[20px] p-3.5 flex gap-3 items-center font-bold hover:shadow-[6px_6px_0px_#000] hover:-translate-y-0.5 transition relative overflow-hidden">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/></svg>
+              <span class="font-black">@miracleechoes</span>
+              <span class="mono text-xs">auf Instagram folgen</span>
+              <span class="ml-auto mono text-xs font-bold underline">→</span>
+            </a>
             <a href="https://www.instagram.com/hannah_rumetshofer/" target="_blank" class="group bg-white border-[2.5px] border-black rounded-[20px] p-3.5 flex gap-3 items-center hover:shadow-[6px_6px_0px_#000] hover:-translate-y-0.5 transition relative overflow-hidden flex-1">
               <img :src="'/images/post_05.jpg'" class="w-14 h-14 rounded-full object-cover border-2 border-black shrink-0"/>
               <div class="min-w-0">
@@ -358,14 +364,16 @@ onMounted(()=>{
   // disco ball - exact https://codepen.io/msaetre/pen/eYwqrb - perfect with light background
   // codepen disco ball - exact https://codepen.io/msaetre/pen/eYwqrb - no flicker (static tiles, smooth spin)
   // codepen disco ball - exact for Chrome, CSS fallback for Firefox (no flicker)
-  var isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1
   var discoWrap = document.getElementById('discoWrap')
-  if(discoWrap && isFirefox){
+  var ua = navigator.userAgent.toLowerCase()
+  var isFirefox = ua.indexOf('firefox') > -1
+  var supports3D = typeof CSS !== 'undefined' && CSS.supports && CSS.supports('transform-style', 'preserve-3d')
+  if(discoWrap && (!supports3D || isFirefox)){
     discoWrap.style.display = 'none'
   }
   var discoBall=document.getElementById('discoBall')
-  if(discoBall && !isFirefox){
-    // Chrome/Safari: full codepen 3D sphere
+  if(discoBall && supports3D && !isFirefox){
+    // Chrome/Edge/Brave/Safari: full codepen 3D sphere
       var radius=50, squareSize=7, prec=14, fuzzy=0.001
       var inc=(Math.PI-fuzzy)/prec
       for(var tt=fuzzy; tt<Math.PI; tt+=inc){
@@ -410,11 +418,12 @@ html{width:100%;height:100%}
 #discoBall{transform-style:preserve-3d;width:100px;height:100px;position:absolute;top:50px;left:50%;margin-left:-50px;animation:rotateDiscoBall 24s linear infinite;will-change:transform;backface-visibility:hidden}
 .square{transform-style:preserve-3d;position:absolute;top:50px;left:50px;width:6px;height:6px;will-change:transform}
 #discoBallMiddle{height:100%;border-radius:100%;background-color:#222;position:absolute;background:linear-gradient(to top,#222,#444);animation:rotateDiscoBallMiddle 24s linear infinite;will-change:transform}
-@media(max-width:768px){#discoBall{width:70px;height:70px;margin-left:-35px} #discoBallLight{width:70px;height:70px;margin-left:-35px}}
+@media(max-width:768px){#discoBall{width:60px;height:60px;margin-left:-30px} #discoBallLight{width:60px;height:60px;margin-left:-30px}}
 #discoBallLight{width:100px;height:100px;position:absolute;top:50px;left:50%;margin-left:-50px;border-radius:100%;background-color:white;opacity:0.2;filter:blur(20px)}
 
 
 @keyframes swing{0%{transform:translateX(-50%) rotate(-2deg)}50%{transform:translateX(-50%) rotate(2deg)}100%{transform:translateX(-50%) rotate(-2deg)}}
+@media(max-width:768px){@keyframes swing{0%{transform:translateX(-50%) rotate(-1deg)}50%{transform:translateX(-50%) rotate(1deg)}100%{transform:translateX(-50%) rotate(-1deg)}}}
 @keyframes floatNote{0%{transform:translateY(0px) translateX(0px) rotate(var(--r,0deg))}50%{transform:translateY(-18px) translateX(var(--tx,0px)) rotate(var(--r,0deg))}100%{transform:translateY(0px) translateX(0px) rotate(var(--r,0deg))}}
 @keyframes swingStaff{0%{transform:rotate(-1.5deg)}50%{transform:rotate(1.5deg)}100%{transform:rotate(-1.5deg)}}
 @keyframes waveFlag{0%{transform: skewY(0deg) translateX(0px)}25%{transform: skewY(0.8deg) translateX(1px)}50%{transform: skewY(-0.6deg) translateX(-1px)}75%{transform: skewY(0.5deg) translateX(0.5px)}100%{transform: skewY(0deg) translateX(0px)}}
