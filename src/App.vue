@@ -272,7 +272,7 @@ const allGigs = [
   { date:'07.08.2025', place:'Kirchdorfer Stadtspektakel', city:'Kirchdorf', note:'Stagetime 19:00 — Ein MIRACLE Classic', link:'https://www.instagram.com/miracleechoes/reel/DbtYTr4umA3/' },
   { date:'01.02.2026', place:'Bar-Café Hildegard', city:'Scharnstein', note:'tagging @miracleechoes', link:'https://www.instagram.com/hildegard__bar/p/DUNaCaADzgc/' },
 
-  { date:'23.08.2026', place:'Schlossgartenfest', city:'Kremsmünster', note:'next gig', link:'https://www.instagram.com/miracleechoes/' },
+  { date:'23.08.2026', place:'Schlossgartenfest', city:'Kremsmünster', note:'Open Air • Stagetime 19:00', link:'https://www.instagram.com/miracleechoes/' },
   { date:'07.08.2026', place:'Kirchdorfer Stadtspektakel', city:'Kirchdorf', note:'Offene Bühne — Session Opener Throwback', link:'https://www.instagram.com/miracleechoes/reel/DYCn-9rIgqN/' },
 ]
 
@@ -287,8 +287,8 @@ const past = allGigs.map(g=> ({...g, d: parseDate(g.date)})).filter(g=> g.d && g
 const nextGig = computed(()=> upcoming[0] || [...allGigs].sort((a,b)=> parseDate(b.date)-parseDate(a.date))[0] || allGigs[3])
 const nextGigLabel = computed(()=> {
   const g = nextGig.value
-  const d = g.date === '07.08.2026' && g.place==='Kirchdorfer Stadtspektakel' ? '07.08. • 19:00' : g.date
-  return `${d} • ${g.place}`
+  if (g.date === '07.08.2026' && g.place==='Kirchdorfer Stadtspektakel') return '07.08. • 19:00'
+  return g.date
 })
 const pastGigs = computed(()=> past.length ? past : allGigs.filter(g=> g.date !== nextGig.value.date).slice(0,4))
 
