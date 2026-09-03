@@ -1,0 +1,13 @@
+{
+  "name": "MIRACLE — Hannah & Sophie",
+  "short_name": "MIRACLE",
+  "description": "MIRACLE aus Oberösterreich — Hannah (Gitarre) & Sophie (Gesang). @miracleechoes",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FFF8E8",
+  "theme_color": "#0A0A0A",
+  "icons": [
+    { "src": "/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" },
+    { "src": "/favicon-32x32.png", "sizes": "32x32", "type": "image/png" }
+  ]
+}
