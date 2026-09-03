@@ -107,7 +107,7 @@
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/></svg>
               <span class="font-black">@miracleechoes</span>
               <span class="mono text-xs">auf Instagram folgen</span>
-              <span class="ml-auto mono text-xs font-bold underline">→</span>
+              <span class="ml-auto w-8 h-8 rounded-full bg-black text-white grid place-items-center group-hover:bg-[#FF3B2F] transition shrink-0">↗</span>
             </a>
             <a href="https://www.instagram.com/hannah_rumetshofer/" target="_blank" class="group bg-white border-[2.5px] border-black rounded-[20px] p-3.5 flex gap-3 items-center hover:shadow-[6px_6px_0px_#000] hover:-translate-y-0.5 transition relative overflow-hidden flex-1">
               <img :src="'/images/post_05.jpg'" class="w-14 h-14 rounded-full object-cover border-2 border-black shrink-0"/>
