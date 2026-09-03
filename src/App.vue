@@ -122,7 +122,7 @@
               <div class="absolute top-2 right-2 text-sm opacity-30">🪩</div>
               <img :src="'/images/sophie.jpg'" class="w-14 h-14 rounded-full object-cover border-2 border-white shrink-0"/>
               <div class="min-w-0">
-                <div class="mono text-[10px] tracking-widest opacity-50">GESANG • DISCO 🪩</div>
+                <div class="mono text-[10px] tracking-widest opacity-50">GESANG</div>
                 <div class="font-black leading-none truncate">sophie.fsdr</div>
                 <div class="mono text-xs opacity-70 flex items-center gap-1"><svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/></svg> 19 Posts • 741 Follower</div>
               </div>
