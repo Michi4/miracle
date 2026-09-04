@@ -16,8 +16,8 @@ Website for the Austrian band **MIRACLE** (Hannah & Sophie).
 - Reels from Instagram (@miracleechoes) — images served locally
 - SoundCloud "coming soon" section
 - Live gigs + past shows
-- Playful artsy background (music notes, staff systems, blobs)
-- Canvas disco ball (zero flicker, Firefox-safe)
+- Playful artsy background (music notes, blobs)
+- Codepen-style 3D disco ball (static tiles, hidden on Firefox where 3D flickers)
 - Full SEO: Open Graph, Twitter, JSON-LD `MusicGroup` schema
 
 ## Run locally

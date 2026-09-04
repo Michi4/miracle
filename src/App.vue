@@ -54,11 +54,6 @@
     <div class="absolute text-xl opacity-[0.06] rotate-[20deg] select-none hidden md:block" style="top:42%; left:65%; animation: floatNote 11s ease-in-out infinite 1.0s;">♯</div>
   </div>
 
-  <!-- cursor -->
-  <div ref="cursor" class="hidden fixed top-0 left-0 w-7 h-7 -translate-x-1/2 -translate-y-1/2 rounded-full border border-black pointer-events-none z-[90] items-center justify-center mix-blend-difference bg-white will-change-transform" style="display:none">
-    <div ref="cursorDot" class="w-1 h-1 bg-black rounded-full"></div>
-  </div>
-
   <div ref="preloader" class="fixed inset-0 z-[100] bg-[#0A0A0A] text-[#FFF8E8] flex flex-col items-center justify-center">
     <div class="instrument text-[22vw] lg:text-[16vw] leading-none tracking-[-0.02em] flex justify-center overflow-hidden" style="letter-spacing: -0.02em;">
       <span v-for="c in 'MIRACLE'" class="pre-char inline-block translate-y-full">{{c}}</span>
@@ -110,9 +105,9 @@
               <span class="ml-auto w-8 h-8 rounded-full bg-black text-white grid place-items-center group-hover:bg-[#FF3B2F] transition shrink-0">↗</span>
             </a>
             <a href="https://www.instagram.com/hannah_rumetshofer/" target="_blank" class="group bg-white border-[2.5px] border-black rounded-[20px] p-3.5 flex gap-3 items-center hover:shadow-[6px_6px_0px_#000] hover:-translate-y-0.5 transition relative overflow-hidden flex-1">
-              <img :src="'/images/post_05.jpg'" class="w-14 h-14 rounded-full object-cover border-2 border-black shrink-0"/>
+              <img :src="'/images/post_05.jpg'" alt="Hannah Rumetshofer, Gitarre bei MIRACLE" class="w-14 h-14 rounded-full object-cover border-2 border-black shrink-0"/>
               <div class="min-w-0">
-                <div class="mono text-[10px] tracking-widest opacity-40">GITARRE</div>
+                <div class="mono text-[10px] tracking-widest opacity-60">GITARRE</div>
                 <div class="font-black leading-none truncate">hannah_rumetshofer</div>
                 <div class="mono text-xs opacity-60 flex items-center gap-1"><svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/></svg> 12 Posts • 307 Follower</div>
               </div>
@@ -120,7 +115,7 @@
             </a>
             <a href="https://www.instagram.com/sophie.fsdr/" target="_blank" class="group bg-black text-white border-[2.5px] border-black rounded-[20px] p-3.5 flex gap-3 items-center hover:shadow-[6px_6px_0px_#000] hover:-translate-y-0.5 transition relative overflow-hidden flex-1">
               <div class="absolute top-2 right-2 text-sm opacity-30">🪩</div>
-              <img :src="'/images/sophie.jpg'" class="w-14 h-14 rounded-full object-cover border-2 border-white shrink-0"/>
+              <img :src="'/images/sophie.jpg'" alt="Sophie Fischereder, Gesang bei MIRACLE" class="w-14 h-14 rounded-full object-cover border-2 border-white shrink-0"/>
               <div class="min-w-0">
                 <div class="mono text-[10px] tracking-widest opacity-50">GESANG</div>
                 <div class="font-black leading-none truncate">sophie.fsdr</div>
@@ -170,7 +165,7 @@
       <div class="max-w-[1600px] mx-auto relative">
         <div class="flex flex-wrap justify-between gap-4 items-end">
           <div>
-            <div class="mono text-[11px] tracking-[0.35em] opacity-40">{{ isDe ? 'REELS — VON @miracleechoes' : 'REELS — FROM @miracleechoes' }}</div>
+            <div class="mono text-[11px] tracking-[0.35em] opacity-60">{{ isDe ? 'REELS — VON @miracleechoes' : 'REELS — FROM @miracleechoes' }}</div>
             <h2 class="instrument text-[10vw] lg:text-[5vw] leading-[0.85] mt-1">Reels</h2>
           </div>
           <a href="https://www.instagram.com/miracleechoes/" target="_blank" class="mono text-xs font-bold bg-white text-black px-6 py-3 rounded-full hover:bg-[#FF3B2F] hover:text-white transition inline-flex items-center gap-1.5"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/></svg> {{ isDe ? 'ALLE 28 ANSEHEN' : 'SEE 28 POSTS' }}</a>
@@ -183,7 +178,7 @@
               <div class="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/60 backdrop-blur border border-white/20 grid place-items-center text-white text-xs">↗</div>
             </div>
             <div class="p-4 flex-1 flex flex-col">
-              <div class="mono text-[11px] opacity-40">{{post.date}}</div>
+              <div class="mono text-[11px] opacity-60">{{post.date}}</div>
               <div class="font-medium text-[15px] leading-[1.45] mt-1 break-words">{{post.caption.split('#')[0].trim()}}</div>
               <div v-if="post.caption.includes('#')" class="mono text-[11px] opacity-30 mt-1 break-words">#{{post.caption.split('#').slice(1).join(' #').trim()}}</div>
             </div>
@@ -196,9 +191,9 @@
     <!-- LIVE -->
     <section id="live" class="w-full py-8">
       <div class="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-10">
-        <div class="mono text-[11px] tracking-[0.3em] opacity-40">LIVE</div>
+        <div class="mono text-[11px] tracking-[0.3em] opacity-60">LIVE</div>
       </div>
-      <div class="mono text-[11px] tracking-[0.3em] opacity-40">LIVE</div>
+      <div class="mono text-[11px] tracking-[0.3em] opacity-60">LIVE</div>
       <div class="mt-4 border-y-[3px] md:border-[3px] md:rounded-[32px] overflow-hidden bg-white shadow-[0_16px_50px_rgba(0,0,0,0.08)] md:mx-4 lg:mx-8 xl:mx-10">
         <div class="p-7 md:p-8 flex flex-wrap gap-6 justify-between items-center bg-gradient-to-br from-white via-[#FFF8E8] to-[#FFE9A8] relative overflow-hidden">
           <div class="absolute -right-10 -top-10 w-40 h-40 bg-[#FF3B2F] rounded-full blur-[40px] opacity-10"></div>
@@ -210,7 +205,7 @@
           <a :href="nextGig.link" target="_blank" class="mono text-xs font-bold bg-black text-white px-7 py-3.5 rounded-full hover:bg-[#FF3B2F] transition inline-flex items-center gap-1.5"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/></svg> {{ isDe ? 'INFOS' : 'INFO' }}</a>
         </div>
         <div class="border-t border-black/10">
-          <div class="px-6 py-3 mono text-[11px] tracking-[0.2em] opacity-40 flex justify-between bg-black/[0.02]"><span>{{ isDe ? 'VERGANGENE AUFTRITTE' : 'PAST SHOWS' }}</span><span class="opacity-60">Instagram</span></div>
+          <div class="px-6 py-3 mono text-[11px] tracking-[0.2em] opacity-60 flex justify-between bg-black/[0.02]"><span>{{ isDe ? 'VERGANGENE AUFTRITTE' : 'PAST SHOWS' }}</span><span class="opacity-60">Instagram</span></div>
           <div v-for="g in pastGigs" :key="g.date+g.place" class="flex flex-wrap gap-3 px-6 py-3.5 border-t border-black/5 hover:bg-black/[0.02] transition text-sm">
             <span class="mono text-xs font-bold bg-black text-white px-3 py-1 rounded-full shrink-0">{{g.date}}</span>
             <span class="font-bold">{{g.place}}</span>
@@ -236,36 +231,9 @@
 import { ref, onMounted, computed } from 'vue'
 import gsap from 'gsap'
 import Lenis from 'lenis'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
-gsap.registerPlugin(ScrollTrigger)
 
 const locale = ref('de')
 const isDe = computed(()=> locale.value==='de')
-const tr = computed(()=> isDe.value ? {
-  nav_about: 'ÜBER UNS', nav_music: 'REELS', nav_live: 'LIVE',
-  hero_bio: 'BIO — ORIGINAL',
-  hero_next: 'HEUTE — 23.08. • 19:00',
-  hero_next_city: 'Kremsmünster',
-  hero_next_note: 'Stagetime 19:00 • Oberösterreich — Open Air',
-  about_title: 'MIRACLE IST', about_sub: 'Hannah<br>& Sophie', about_desc: 'Gitarre & Gesang • Oberösterreich • 🪩 Disco',
-  music_label: 'REELS — VON @miracleechoes', music_title: 'Reels',
-  live_label: 'LIVE', live_next: 'NÄCHSTER GIG — 23.08.2026 • 19:00', live_city: 'Kremsmünster', live_note: 'nächster Gig: 23.08. - Schlossgartenfest Kremsmünster • Oberösterreich',
-  past_title: 'VERGANGENE AUFTRITTE', past_sub: 'aus Instagram', more_shows: 'Mehr Shows → folge @miracleechoes',
-  footer: '© 2026 MIRACLE — @miracleechoes • 28 Posts • Oberösterreich',
-  see_all: 'ALLE 28 ANSEHEN', infos: 'INFOS', details: 'DETAILS', instagram: 'Instagram'
-} : {
-  nav_about: 'ABOUT', nav_music: 'REELS', nav_live: 'LIVE',
-  hero_bio: 'BIO — ORIGINAL',
-  hero_next: 'TODAY — 23.08. • 7PM',
-  hero_next_city: 'Kremsmünster',
-  hero_next_note: 'Stagetime 7PM • Upper Austria — Open Air',
-  about_title: 'MIRACLE IS', about_sub: 'Hannah<br>& Sophie', about_desc: 'Guitar & Vocals • Upper Austria • 🪩 Disco',
-  music_label: 'REELS — FROM @miracleechoes', music_title: 'Reels',
-  live_label: 'LIVE', live_next: 'NEXT UP — 23.08.2026 • 7PM', live_city: 'Kremsmünster', live_note: 'next gig: 23.08. - Schlossgartenfest Kremsmünster • Upper Austria',
-  past_title: 'PAST SHOWS', past_sub: 'from Instagram', more_shows: 'More shows → follow @miracleechoes',
-  footer: '© 2026 MIRACLE — @miracleechoes • 28 posts • Upper Austria',
-  see_all: 'SEE 28 POSTS', infos: 'INFO', details: 'DETAILS', instagram: 'Instagram'
-})
 const active = ref('about')
 
 const allGigs = [
@@ -309,8 +277,6 @@ const heroTitle = ref(null)
 const blob1 = ref(null)
 const blob2 = ref(null)
 const blob3 = ref(null)
-const cursor = ref(null)
-const cursorDot = ref(null)
 
 onMounted(()=>{
   const lang = (navigator.language || '').toLowerCase()
@@ -350,7 +316,6 @@ onMounted(()=>{
   const lenis = new Lenis({ duration: isMobile ? 0.8 : 1.0, easing:t=>Math.min(1,1.001-Math.pow(2,-10*t)), smoothTouch:false })
   // lenis scroll without disco flicker
   function raf(t){ lenis.raf(t); requestAnimationFrame(raf)} requestAnimationFrame(raf)
-  // cursor removed for performance
   const tl=gsap.timeline({delay:0.3})
   tl.to('.pre-char',{y:0,duration:0.7,stagger:0.05,ease:'expo.out'})
   tl.to(preloader.value,{yPercent:-100,duration:0.8,ease:'expo.inOut'},0.9)
