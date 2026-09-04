@@ -94,18 +94,18 @@ No backend endpoints (only static files + 2 image-proxy locations), no forms/inp
 ## Phase 7 — Testing
 No suite exists (`package.json` has only dev/build/preview). Nothing to run. Proposed: vitest + one spec for gig-date selection (`parseDate`/`nextGig`/`pastGigs`) — the only logic that already caused user-visible confusion. Proposing, not adding unasked (adds devDeps + CI).
 
-## Scorecard
+## Scorecard (2026-09-04, after fix loop — all re-verified live)
 - Phase 0 recon: ✅ clean
-- Phase 1 frontend: ✅ clean except MEDIUM-6/7/9 (dead code, alt, contrast)
+- Phase 1 frontend: ✅ clean (dead code removed, alts added, microcopy contrast bumped)
 - Phase 2 backend: ➖ N/A (static site)
-- Phase 3 security: ⚠️ open HIGH-3 (headers) + MEDIUM-5 (open proxies); secrets clean; TLS valid
+- Phase 3 security: ✅ headers live, proxy methods restricted, secrets clean, TLS valid; open MEDIUM-5 reduced to rate-limit recommendation
 - Phase 4 data: ➖ N/A (no DB)
-- Phase 5 infra: ⚠️ open HIGH-1/2 (lockfile, audit/CI); no staging; rollback = previous image (acceptable, documented)
-- Phase 6 journeys: ✅ all pass
-- Phase 7 testing: ⚠️ no suite (proposed)
+- Phase 5 infra: ✅ lockfile + `npm ci` + CI (build+test+audit); no staging; rollback = previous image
+- Phase 6 journeys: ✅ all pass (re-driven after refactor)
+- Phase 7 testing: ✅ vitest, 9/9 pass (`src/gigs.test.js`)
 
-## Verdict: **Conditional Go**
-No CRITICAL items. Ship-blockers are process/hardening items, not broken functionality: **HIGH-1 (lockfile), HIGH-2 (audit in CI), HIGH-3 (security headers)**. Fix Batches A–D below, re-verify, then unconditional Go.
+## Verdict: **Go**
+No CRITICAL items; all HIGH items fixed and re-verified live on 2026-09-04. Remaining: rate-limiting is Traefik-level (optional), `npm audit` still unverifiable from this host (runs in CI instead), Lighthouse unmeasured (no tooling here).
 
 ### Proposed fix batches (need your OK before prod rebuild)
 - **A (safe, additive):** `public/robots.txt` + `public/sitemap.xml`
