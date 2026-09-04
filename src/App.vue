@@ -236,28 +236,11 @@ const locale = ref('de')
 const isDe = computed(()=> locale.value==='de')
 const active = ref('about')
 
-const allGigs = [
-  { date:'07.08.2025', place:'Kirchdorfer Stadtspektakel', city:'Kirchdorf', note:'Stagetime 19:00 — Ein MIRACLE Classic', link:'https://www.instagram.com/miracleechoes/reel/DbtYTr4umA3/' },
-  { date:'01.02.2026', place:'Bar-Café Hildegard', city:'Scharnstein', note:'tagging @miracleechoes', link:'https://www.instagram.com/hildegard__bar/p/DUNaCaADzgc/' },
-
-  { date:'23.08.2026', place:'Schlossgartenfest', city:'Kremsmünster', note:'Open Air • Stagetime 19:00', link:'https://www.instagram.com/miracleechoes/' },
-  { date:'07.08.2026', place:'Kirchdorfer Stadtspektakel', city:'Kirchdorf', note:'Offene Bühne — Session Opener Throwback', link:'https://www.instagram.com/miracleechoes/reel/DYCn-9rIgqN/' },
-]
-
-function parseDate(s){
-  const m = s.match(/(\d{2})\.(\d{2})\.(\d{4})/)
-  if(!m) return null
-  return new Date(`${m[3]}-${m[2]}-${m[1]}T19:00:00`)
-}
-const today = new Date(); today.setHours(0,0,0,0)
-const upcoming = allGigs.map(g=> ({...g, d: parseDate(g.date)})).filter(g=> g.d && g.d >= today).sort((a,b)=> a.d - b.d)
-const past = allGigs.map(g=> ({...g, d: parseDate(g.date)})).filter(g=> g.d && g.d < today).sort((a,b)=> b.d - a.d)
-const nextGig = computed(()=> upcoming[0] || [...allGigs].sort((a,b)=> parseDate(b.date)-parseDate(a.date))[0] || allGigs[3])
-const nextGigLabel = computed(()=> {
-  const g = nextGig.value
-  if (g.date === '07.08.2026' && g.place==='Kirchdorfer Stadtspektakel') return '07.08. • 19:00'
-  return g.date
-})
+import { allGigs, splitGigs, pickNextGig, gigLabel, startOfDay } from './gigs.js'
+const now = startOfDay(new Date())
+const { upcoming, past } = splitGigs(allGigs, now)
+const nextGig = computed(()=> pickNextGig(allGigs, now))
+const nextGigLabel = computed(()=> gigLabel(nextGig.value))
 const pastGigs = computed(()=> past.length ? past : allGigs.filter(g=> g.date !== nextGig.value.date).slice(0,4))
 
 const posts = ref([
