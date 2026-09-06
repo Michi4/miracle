@@ -75,7 +75,7 @@
     <a href="https://www.instagram.com/miracleechoes/" target="_blank" aria-label="Instagram" class="bg-[#FF3B2F] w-8 h-8 grid place-items-center rounded-full shrink-0"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/></svg></a>
   </div>
 
-  <div id="discoWrap" class="absolute top-0 left-1/2 -translate-x-1/2 z-30 pointer-events-auto flex flex-col items-center cursor-grab active:cursor-grabbing">
+  <div id="discoWrap" class="absolute top-0 left-1/2 -translate-x-1/2 max-md:left-auto max-md:right-[6%] max-md:translate-x-0 z-30 pointer-events-auto flex flex-col items-center cursor-grab active:cursor-grabbing">
     <div class="w-px h-[88px] bg-neutral-800/80"></div>
     <div id="discoBallLight" style="top: 88px;"></div>
     <div id="discoBall" style="top: 88px;"><div id="discoBallMiddle"></div></div>
@@ -275,29 +275,19 @@ onMounted(()=>{
   const lang = (navigator.language || '').toLowerCase()
   if(lang.startsWith('de')) locale.value='de'
   // auto select nav on scroll
-  const sections = ['about','music','live']
-  // navbar auto-select - works both up and down
-  let current = 'about'
-  const observer = new IntersectionObserver((entries)=>{
-    // small sections (e.g. live) can miss the observer band — check directly every time
-    const liveEl = document.getElementById('live')
-    if(liveEl){
-      const r = liveEl.getBoundingClientRect(), vh = window.innerHeight
-      if(r.top < vh*0.75 && r.bottom > vh*0.25){ active.value = 'live'; return }
+  // navbar auto-select - deterministic scroll position (cannot skip sections)
+  const sectionIds = ['about','music','live']
+  function updateActive(){
+    const line = window.innerHeight * 0.35
+    let cur = 'about'
+    for(const id of sectionIds){
+      const el = document.getElementById(id)
+      if(el && el.getBoundingClientRect().top <= line) cur = id
     }
-    entries.forEach(e=>{
-      if(e.isIntersecting){
-        // only update if this section is more visible
-        const rect = e.target.getBoundingClientRect()
-        if(rect.top < window.innerHeight * 0.5) current = e.target.id
-      }
-    })
-    if(current !== 'live') active.value = current
-  }, {rootMargin:'-30% 0px -30% 0px', threshold:0.1})
-  sections.forEach(id=>{
-    const el=document.getElementById(id)
-    if(el) observer.observe(el)
-  })
+    active.value = cur
+  }
+  window.addEventListener('scroll', updateActive, {passive:true})
+  updateActive()
   // disco ball is decorative behind everything (CSS spin only, no drag)
   // lenis
   const isMobile = window.innerWidth < 768
