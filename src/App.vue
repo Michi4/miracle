@@ -74,7 +74,7 @@
     <a href="https://www.instagram.com/miracleechoes/" target="_blank" class="bg-[#FF3B2F] w-8 h-8 grid place-items-center rounded-full"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/></svg></a>
   </div>
 
-  <div id="discoWrap" class="absolute top-0 left-1/2 -translate-x-1/2 z-30 pointer-events-auto flex flex-col items-center cursor-grab active:cursor-grabbing" style="transform-origin: top center; animation: swing 3.4s ease-in-out infinite;">
+  <div id="discoWrap" class="absolute top-0 left-1/2 -translate-x-1/2 z-30 pointer-events-auto flex flex-col items-center cursor-grab active:cursor-grabbing">
     <div class="w-px h-[88px] bg-neutral-800 mx-auto" style="width:1px;"></div>
     <div id="discoBallLight" style="top: 88px;"></div>
     <div id="discoBall" style="top: 88px;"><div id="discoBallMiddle"></div></div>
@@ -321,32 +321,60 @@ onMounted(()=>{
   }
   var discoBall=document.getElementById('discoBall')
   if(discoBall && supports3D && !isFirefox){
-    // Chrome/Edge/Brave/Safari: full codepen 3D sphere
-      var radius=50, squareSize=7, prec=14, fuzzy=0.001
-      var inc=(Math.PI-fuzzy)/prec
-      for(var tt=fuzzy; tt<Math.PI; tt+=inc){
-        var z=radius*Math.cos(tt)
-        var curR=Math.abs((radius*Math.cos(0)*Math.sin(tt))-(radius*Math.cos(Math.PI)*Math.sin(tt)))/2.5
-        var circ=Math.abs(2*Math.PI*curR)
-        var fit=Math.floor(circ/squareSize)
-        var angInc=(Math.PI*2-fuzzy)/fit
-        for(var i=angInc/2+fuzzy;i<(Math.PI*2);i+=angInc){
-          var square=document.createElement('div')
-          var tile=document.createElement('div')
-          tile.style.width=squareSize+'px'; tile.style.height=squareSize+'px'
-          tile.style.transformOrigin='0 0 0'
-          tile.style.transform='rotate('+i+'rad) rotateY('+tt+'rad)'
-          var bright=(tt>1.3&&tt<1.9)
-          var rnd=Math.random()
-          var c = bright ? 200+Math.floor(rnd*55) : 150+Math.floor(rnd*85)
-          tile.style.backgroundColor='rgb('+c+','+c+','+c+')'
-          tile.style.backfaceVisibility='hidden'
-          square.appendChild(tile); square.className='square'
-          var x=radius*Math.cos(i)*Math.sin(tt), y=radius*Math.sin(i)*Math.sin(tt)
-          square.style.transform='translateX('+x+'px) translateY('+y+'px) translateZ('+z+'px)'
-          discoBall.appendChild(square)
-        }
+  var radius = 50;
+  var squareSize = 6.5;
+  var prec = 19.55;
+  var fuzzy = 0.001;
+  var inc = (Math.PI-fuzzy)/prec;
+
+  for(var t=fuzzy; t<Math.PI; t+=inc) {
+    var z = radius * Math.cos(t);
+    var currentRadius = Math.abs((radius * Math.cos(0) * Math.sin(t)) - (radius * Math.cos(Math.PI) * Math.sin(t))) / 2.5;
+    var circumference = Math.abs(2 * Math.PI * currentRadius);
+    var squaresThatFit = Math.floor(circumference / squareSize);
+    var angleInc = (Math.PI*2-fuzzy) / squaresThatFit;
+    for(var i=angleInc/2+fuzzy; i<(Math.PI*2); i+=angleInc) {
+      var square = document.createElement("div");
+      var squareTile = document.createElement("div");
+      squareTile.style.width = squareSize + "px";
+      squareTile.style.height = squareSize + "px";
+      squareTile.style.transformOrigin = "0 0 0";
+      squareTile.style.webkitTransformOrigin = "0 0 0";
+      squareTile.style.webkitTransform = "rotate(" + i + "rad) rotateY(" + t + "rad)";
+      squareTile.style.transform = "rotate(" + i + "rad) rotateY(" + t + "rad)";
+      if((t>1.3 && t<1.9) || (t<-1.3 && t>-1.9)) {
+        squareTile.style.backgroundColor = randomColor("bright");
+      } else {
+        squareTile.style.backgroundColor = randomColor("any");
       }
+      square.appendChild(squareTile);
+      square.className = "square";
+      squareTile.style.webkitAnimation = "reflect 2s linear infinite";
+      squareTile.style.webkitAnimationDelay = String(randomNumber(0,20)/10) + "s";
+      squareTile.style.animation = "reflect 2s linear infinite";
+      squareTile.style.animationDelay = String(randomNumber(0,20)/10) + "s";
+      squareTile.style.backfaceVisibility = "hidden";
+      var x = radius * Math.cos(i) * Math.sin(t);
+      var y = radius * Math.sin(i) * Math.sin(t);
+      square.style.webkitTransform = "translateX(" + Math.ceil(x) + "px) translateY(" + y + "px) translateZ(" + z + "px)";
+      square.style.transform = "translateX(" + x + "px) translateY(" + y + "px) translateZ(" + z + "px)";
+      discoBall.appendChild(square);
+    }
+  }
+
+  function randomColor(type) {
+    var c;
+    if(type == "bright") {
+      c = randomNumber(130, 255);
+    } else {
+      c = randomNumber(110, 190);
+    }
+    return "rgb(" + c + "," + c + "," + c + ")";
+  }
+
+  function randomNumber(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
   }
 })
 </script>
@@ -363,11 +391,40 @@ html { scroll-behavior: auto; }
 .paper::after{content:"";position:absolute;inset:0;background-image:url("data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22><filter id=%22n%22><feTurbulence baseFrequency=%220.9%22/></filter><rect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23n)%22 opacity=%220.015%22/></svg>");pointer-events:none;opacity:0.6}
 .mono{font-family:"JetBrains Mono",monospace}
 html{width:100%;height:100%}
-#discoBall{transform-style:preserve-3d;width:100px;height:100px;position:absolute;top:50px;left:50%;margin-left:-50px;animation:rotateDiscoBall 24s linear infinite;will-change:transform;backface-visibility:hidden}
-.square{transform-style:preserve-3d;position:absolute;top:50px;left:50px;width:6px;height:6px;will-change:transform}
-#discoBallMiddle{height:100%;border-radius:100%;background-color:#222;position:absolute;background:linear-gradient(to top,#222,#444);animation:rotateDiscoBallMiddle 24s linear infinite;will-change:transform}
-@media(max-width:768px){#discoBall{width:60px;height:60px;margin-left:-30px} #discoBallLight{width:60px;height:60px;margin-left:-30px}}
-#discoBallLight{width:100px;height:100px;position:absolute;top:50px;left:50%;margin-left:-50px;border-radius:100%;background-color:white;opacity:0.2;filter:blur(20px)}
+#discoBall {
+  -webkit-transform-style: preserve-3d;
+  transform-style: preserve-3d;
+  width: 100px;
+  height: 100px;
+  position: absolute;
+  top: 50px;
+  left: 50%;
+  margin-left: -50px;
+  -webkit-animation: rotateDiscoBall 18s linear infinite;
+  animation: rotateDiscoBall 18s linear infinite;
+}
+#discoBallMiddle {
+  height: 100%;
+  border-radius: 100%;
+  background-color: #111;
+  position: absolute;
+  background: -webkit-linear-gradient(top, #111, #333);
+  background: -moz-linear-gradient(top, #111, #333);
+  background: linear-gradient(top, #111, #333);
+  -webkit-animation: rotateDiscoBallMiddle 18s linear infinite;
+  animation: rotateDiscoBallMiddle 18s linear infinite;
+}
+.square {
+  -webkit-transform-style: preserve-3d;
+  transform-style: preserve-3d;
+  position: absolute;
+  top: 50px;
+  left: 50px;
+  width: 6px;
+  height: 6px;
+  position: absolute;
+  transform: rotateX(90deg) rotateY(0deg) translateZ(0px);
+}
 
 
 @keyframes swing{0%{transform:translateX(-50%) rotate(-2deg)}50%{transform:translateX(-50%) rotate(2deg)}100%{transform:translateX(-50%) rotate(-2deg)}}
@@ -381,5 +438,44 @@ html{width:100%;height:100%}
 
 @keyframes rotateDiscoBallMiddle{0%{transform:rotateX(90deg) rotateY(0deg)}100%{transform:rotateX(90deg) rotateY(-360deg)}}
 
+
+@-webkit-keyframes rotateDiscoBall {
+    0% {-webkit-transform: rotateX(90deg) rotateZ(0deg) rotate(0deg); }
+    100% {-webkit-transform: rotateX(90deg) rotateZ(360deg) rotate(0deg); }
+}
+@keyframes rotateDiscoBall {
+    0% {transform: rotateX(90deg) rotateZ(0deg) rotate(0deg); }
+    100% {transform: rotateX(90deg) rotateZ(360deg) rotate(0deg); }
+}
+@-webkit-keyframes rotateDiscoBallMiddle {
+    0% {-webkit-transform: rotateX(90deg) rotateY(0deg) rotate(0deg); }
+    100% {-webkit-transform: rotateX(90deg) rotateY(-360deg) rotate(0deg); }
+}
+@keyframes rotateDiscoBallMiddle {
+    0% {transform: rotateX(90deg) rotateY(0deg) rotate(0deg); }
+    100% {transform: rotateX(90deg) rotateY(-360deg) rotate(0deg); }
+}
+@-webkit-keyframes reflect {
+    0% {-webkit-filter: brightness(60%);}
+    50% {-webkit-filter: brightness(120%);}
+    100% {-webkit-filter: brightness(90%);}
+}
+@keyframes reflect {
+    0% {opacity: 1;}
+    50% {opacity: 0.4;}
+    100% {opacity: 1;}
+}
+#discoBallLight {
+  width: 100px;
+  height: 100px;
+  position: absolute;
+  top: 50px;
+  left: 50%;
+  margin-left: -50px;
+  border-radius: 100%;
+  background-color: white;
+  opacity: 0.2;
+  -webkit-filter: blur(20px);
+}
 
 </style>
