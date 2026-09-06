@@ -75,12 +75,8 @@
     <a href="https://www.instagram.com/miracleechoes/" target="_blank" aria-label="Instagram" class="bg-[#FF3B2F] w-8 h-8 grid place-items-center rounded-full shrink-0"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/></svg></a>
   </div>
 
-  <!-- disco string stays above content, ball hangs behind everything -->
-  <div class="absolute top-0 right-[4%] z-30 pointer-events-none flex flex-col items-center" aria-hidden="true">
-    <div class="w-px h-[88px] bg-neutral-800/80"></div>
-  </div>
   <div id="discoWrap" class="absolute top-0 left-1/2 -translate-x-1/2 z-30 pointer-events-auto flex flex-col items-center cursor-grab active:cursor-grabbing">
-    <div class="w-px h-[88px] invisible"></div>
+    <div class="w-px h-[88px] bg-neutral-800/80"></div>
     <div id="discoBallLight" style="top: 88px;"></div>
     <div id="discoBall" style="top: 88px;"><div id="discoBallMiddle"></div></div>
   </div>
