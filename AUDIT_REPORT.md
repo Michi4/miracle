@@ -107,6 +107,11 @@ No suite exists (`package.json` has only dev/build/preview). Nothing to run. Pro
 ## Verdict: **Go**
 No CRITICAL items; all HIGH items fixed and re-verified live on 2026-09-04. Remaining: rate-limiting is Traefik-level (optional), `npm audit` still unverifiable from this host (runs in CI instead), Lighthouse unmeasured (no tooling here).
 
+## Re-audit 2026-09-04 (evening): still Go
+- **Fixed:** tracked `src/App.vue.bak` backup removed from git (`bc15ec7`).
+- **Fixed:** disco ball orientation — static `rotateX(90°)` tilt (poles up, like a hanging ball) + `rotateY` vertical spin (`ad85f41`). Verified live: 314 tiles, 103×100px circular spread, 90/100 square tiles.
+- **Re-verified clean:** zero console errors/warnings, zero failed requests, h1=1, no overflow at 1280/390, security headers live, TLS valid to Nov 2026, robots/sitemap 200, secrets scan clean, vitest 9/9 pass, all 4 user journeys pass.
+
 ### Proposed fix batches (need your OK before prod rebuild)
 - **A (safe, additive):** `public/robots.txt` + `public/sitemap.xml`
 - **B (headers, reversible):** XCTO + XFO SAMEORIGIN + Referrer-Policy + `server_tokens off`
