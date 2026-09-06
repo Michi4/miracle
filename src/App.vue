@@ -79,7 +79,7 @@
   <div class="absolute top-0 right-[4%] z-30 pointer-events-none flex flex-col items-center" aria-hidden="true">
     <div class="w-px h-[88px] bg-neutral-800/80"></div>
   </div>
-  <div id="discoWrap" class="absolute top-0 right-[4%] z-0 pointer-events-none flex flex-col items-center" aria-hidden="true">
+  <div id="discoWrap" class="absolute top-0 left-1/2 -translate-x-1/2 z-30 pointer-events-auto flex flex-col items-center cursor-grab active:cursor-grabbing">
     <div class="w-px h-[88px] invisible"></div>
     <div id="discoBallLight" style="top: 88px;"></div>
     <div id="discoBall" style="top: 88px;"><div id="discoBallMiddle"></div></div>
