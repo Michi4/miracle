@@ -222,7 +222,7 @@
 
     <footer class="px-4 sm:px-6 lg:px-8 xl:px-10 py-8 mono text-xs opacity-60 max-w-[1600px] mx-auto flex flex-wrap justify-between gap-4 border-t border-black/5">
       <span>© 2026 MIRACLE — @miracleechoes • 28 Posts • {{ isDe ? 'Oberösterreich' : 'Upper Austria' }}</span>
-      <span class="flex gap-4"><a href="https://www.instagram.com/miracleechoes/" target="_blank" class="underline inline-flex items-center gap-1"><svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8"/></svg> Instagram</a> <a href="https://www.instagram.com/hannah_rumetshofer/" target="_blank" class="underline">Hannah</a> <a href="https://www.instagram.com/sophie.fsdr/" target="_blank" class="underline">Sophie</a></span>
+      <span class="flex gap-4"><a href="https://www.instagram.com/miracleechoes/" target="_blank" class="underline inline-flex items-center gap-1"><svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8"/></svg> Instagram</a> <a href="https://www.instagram.com/hannah_rumetshofer/" target="_blank" class="underline">Hannah</a> <a href="https://www.instagram.com/sophie.fsdr/" target="_blank" class="underline">Sophie</a> <a href="https://codepen.io/msaetre/pen/eYwqrb" target="_blank" class="underline opacity-70">🪩 by msaetre</a></span>
     </footer>
   </main>
 </template>
