@@ -61,10 +61,10 @@
   </div>
 
   <nav ref="nav" class="fixed top-4 left-1/2 -translate-x-1/2 z-40 hidden md:flex items-center gap-1.5 px-2 py-2 rounded-full bg-black text-white mono text-[11px] tracking-widest opacity-0 shadow-[0_12px_40px_rgba(0,0,0,0.25)]">
-    <a href="#about" @click.prevent="go('#about')" :class="active==='about' ? 'bg-white text-black' : 'hover:bg-white hover:text-black'" class="px-4 py-1.5 rounded-full transition">{{ isDe ? 'ÜBER UNS' : 'ABOUT' }}</a>
-    <a href="#music" @click.prevent="go('#music')" :class="active==='music' ? 'bg-white text-black' : 'hover:bg-white hover:text-black'" class="px-4 py-1.5 rounded-full transition">REELS</a>
-    <a href="#live" @click.prevent="go('#live')" :class="active==='live' ? 'bg-white text-black' : 'hover:bg-white hover:text-black'" class="px-4 py-1.5 rounded-full transition">LIVE</a>
-    <button @click="locale = locale==='de' ? 'en' : 'de'" class="px-3 py-1.5 rounded-full border border-white/20 hover:bg-white hover:text-black transition">{{ locale==='de' ? 'EN' : 'DE' }}</button>
+    <a href="#about" @click.prevent="go('#about')" :class="active==='about' ? 'bg-white text-black' : 'hover:bg-white hover:text-black'" class="px-4 py-1.5 rounded-full transition whitespace-nowrap shrink-0">{{ isDe ? 'ÜBER UNS' : 'ABOUT' }}</a>
+    <a href="#music" @click.prevent="go('#music')" :class="active==='music' ? 'bg-white text-black' : 'hover:bg-white hover:text-black'" class="px-4 py-1.5 rounded-full transition whitespace-nowrap shrink-0">REELS</a>
+    <a href="#live" @click.prevent="go('#live')" :class="active==='live' ? 'bg-white text-black' : 'hover:bg-white hover:text-black'" class="px-4 py-1.5 rounded-full transition whitespace-nowrap shrink-0">LIVE</a>
+    <button @click="locale = locale==='de' ? 'en' : 'de'" class="px-3 py-1.5 rounded-full border border-white/20 hover:bg-white hover:text-black transition whitespace-nowrap shrink-0">{{ locale==='de' ? 'EN' : 'DE' }}</button>
     <a href="https://www.instagram.com/miracleechoes/" target="_blank" class="ml-1 bg-[#FF3B2F] px-4 py-1.5 rounded-full font-bold inline-flex items-center gap-1.5 hover:bg-white hover:text-black transition"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg> Instagram</a>
   </nav>
   <div class="fixed bottom-[max(1rem,env(safe-area-inset-bottom))] left-1/2 -translate-x-1/2 z-40 flex md:hidden items-center gap-1 px-2 py-2 rounded-full bg-black text-white mono text-[11px] tracking-widest shadow-[0_8px_30px_rgba(0,0,0,0.3)] max-w-[calc(100vw-2rem)]">
@@ -227,7 +227,7 @@
 
     <footer class="px-4 sm:px-6 lg:px-8 xl:px-10 py-8 pb-24 md:pb-8 mono text-xs opacity-60 max-w-[1600px] mx-auto flex flex-wrap justify-between gap-4 border-t border-black/5">
       <span>© 2026 MIRACLE — @miracleechoes • 28 Posts • {{ isDe ? 'Oberösterreich' : 'Upper Austria' }}</span>
-      <span class="flex gap-4"><a href="https://www.instagram.com/miracleechoes/" target="_blank" class="underline inline-flex items-center gap-1"><svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8"/></svg> Instagram</a> <a href="https://www.instagram.com/hannah_rumetshofer/" target="_blank" class="underline">Hannah</a> <a href="https://www.instagram.com/sophie.fsdr/" target="_blank" class="underline">Sophie</a> <a href="https://codepen.io/msaetre/pen/eYwqrb" target="_blank" class="underline opacity-70">🪩 by msaetre</a></span>
+      <span class="flex gap-4"><a href="https://www.instagram.com/miracleechoes/" target="_blank" class="underline inline-flex items-center gap-1"><svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8"/></svg> Instagram</a> <a href="https://www.instagram.com/hannah_rumetshofer/" target="_blank" class="underline">Hannah</a> <a href="https://www.instagram.com/sophie.fsdr/" target="_blank" class="underline">Sophie</a> <a href="https://codepen.io/msaetre/pen/eYwqrb" target="_blank" class="underline opacity-70">🪩 by msaetre</a> <a href="https://websters.at" target="_blank" class="underline opacity-70">Website by websters.at</a></span>
     </footer>
   </main>
 </template>
@@ -283,6 +283,12 @@ onMounted(()=>{
   // navbar auto-select - works both up and down
   let current = 'about'
   const observer = new IntersectionObserver((entries)=>{
+    // small sections (e.g. live) can miss the observer band — check directly every time
+    const liveEl = document.getElementById('live')
+    if(liveEl){
+      const r = liveEl.getBoundingClientRect(), vh = window.innerHeight
+      if(r.top < vh*0.75 && r.bottom > vh*0.25){ active.value = 'live'; return }
+    }
     entries.forEach(e=>{
       if(e.isIntersecting){
         // only update if this section is more visible
@@ -290,7 +296,7 @@ onMounted(()=>{
         if(rect.top < window.innerHeight * 0.5) current = e.target.id
       }
     })
-    active.value = current
+    if(current !== 'live') active.value = current
   }, {rootMargin:'-30% 0px -30% 0px', threshold:0.1})
   sections.forEach(id=>{
     const el=document.getElementById(id)
