@@ -61,21 +61,26 @@
   </div>
 
   <nav ref="nav" class="fixed top-4 left-1/2 -translate-x-1/2 z-40 hidden md:flex items-center gap-1.5 px-2 py-2 rounded-full bg-black text-white mono text-[11px] tracking-widest opacity-0 shadow-[0_12px_40px_rgba(0,0,0,0.25)]">
-    <a href="#about" :class="active==='about' ? 'bg-white text-black' : 'hover:bg-white hover:text-black'" class="px-4 py-1.5 rounded-full transition">{{ isDe ? 'ÜBER UNS' : 'ABOUT' }}</a>
-    <a href="#music" :class="active==='music' ? 'bg-white text-black' : 'hover:bg-white hover:text-black'" class="px-4 py-1.5 rounded-full transition">REELS</a>
-    <a href="#live" :class="active==='live' ? 'bg-white text-black' : 'hover:bg-white hover:text-black'" class="px-4 py-1.5 rounded-full transition">LIVE</a>
+    <a href="#about" @click.prevent="go('#about')" :class="active==='about' ? 'bg-white text-black' : 'hover:bg-white hover:text-black'" class="px-4 py-1.5 rounded-full transition">{{ isDe ? 'ÜBER UNS' : 'ABOUT' }}</a>
+    <a href="#music" @click.prevent="go('#music')" :class="active==='music' ? 'bg-white text-black' : 'hover:bg-white hover:text-black'" class="px-4 py-1.5 rounded-full transition">REELS</a>
+    <a href="#live" @click.prevent="go('#live')" :class="active==='live' ? 'bg-white text-black' : 'hover:bg-white hover:text-black'" class="px-4 py-1.5 rounded-full transition">LIVE</a>
     <button @click="locale = locale==='de' ? 'en' : 'de'" class="px-3 py-1.5 rounded-full border border-white/20 hover:bg-white hover:text-black transition">{{ locale==='de' ? 'EN' : 'DE' }}</button>
     <a href="https://www.instagram.com/miracleechoes/" target="_blank" class="ml-1 bg-[#FF3B2F] px-4 py-1.5 rounded-full font-bold inline-flex items-center gap-1.5 hover:bg-white hover:text-black transition"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg> Instagram</a>
   </nav>
-  <div class="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 flex md:hidden items-center gap-1 px-2 py-2 rounded-full bg-black text-white mono text-[11px] shadow-[0_8px_30px_rgba(0,0,0,0.3)]">
-    <a href="#about" class="px-3 py-1.5 bg-white text-black rounded-full">{{ isDe ? 'ÜBER' : 'ABOUT' }}</a>
-    <a href="#music" class="px-3 py-1.5 border border-white/20 rounded-full">MUSIK</a>
-    <a href="#live" class="px-3 py-1.5 border border-white/20 rounded-full">LIVE</a>
-    <a href="https://www.instagram.com/miracleechoes/" target="_blank" class="bg-[#FF3B2F] w-8 h-8 grid place-items-center rounded-full"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/></svg></a>
+  <div class="fixed bottom-[max(1rem,env(safe-area-inset-bottom))] left-1/2 -translate-x-1/2 z-40 flex md:hidden items-center gap-1 px-2 py-2 rounded-full bg-black text-white mono text-[11px] tracking-widest shadow-[0_8px_30px_rgba(0,0,0,0.3)] max-w-[calc(100vw-2rem)]">
+    <a href="#about" @click.prevent="go('#about')" :class="active==='about' ? 'bg-white text-black' : 'border border-white/20'" class="px-3 py-1.5 rounded-full transition whitespace-nowrap">{{ isDe ? 'ÜBER' : 'ABOUT' }}</a>
+    <a href="#music" @click.prevent="go('#music')" :class="active==='music' ? 'bg-white text-black' : 'border border-white/20'" class="px-3 py-1.5 rounded-full transition">REELS</a>
+    <a href="#live" @click.prevent="go('#live')" :class="active==='live' ? 'bg-white text-black' : 'border border-white/20'" class="px-3 py-1.5 rounded-full transition">LIVE</a>
+    <button @click="locale = locale==='de' ? 'en' : 'de'" class="px-3 py-1.5 rounded-full border border-white/20 transition shrink-0">{{ locale==='de' ? 'EN' : 'DE' }}</button>
+    <a href="https://www.instagram.com/miracleechoes/" target="_blank" aria-label="Instagram" class="bg-[#FF3B2F] w-8 h-8 grid place-items-center rounded-full shrink-0"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/></svg></a>
   </div>
 
-  <div id="discoWrap" class="absolute top-0 left-1/2 -translate-x-1/2 z-30 pointer-events-auto flex flex-col items-center cursor-grab active:cursor-grabbing">
-    <div class="w-px h-[88px] bg-neutral-800 mx-auto" style="width:1px;"></div>
+  <!-- disco string stays above content, ball hangs behind everything -->
+  <div class="absolute top-0 right-[4%] z-30 pointer-events-none flex flex-col items-center" aria-hidden="true">
+    <div class="w-px h-[88px] bg-neutral-800/80"></div>
+  </div>
+  <div id="discoWrap" class="absolute top-0 right-[4%] z-0 pointer-events-none flex flex-col items-center" aria-hidden="true">
+    <div class="w-px h-[88px] invisible"></div>
     <div id="discoBallLight" style="top: 88px;"></div>
     <div id="discoBall" style="top: 88px;"><div id="discoBallMiddle"></div></div>
   </div>
@@ -220,7 +225,7 @@
       </div>
     </section>
 
-    <footer class="px-4 sm:px-6 lg:px-8 xl:px-10 py-8 mono text-xs opacity-60 max-w-[1600px] mx-auto flex flex-wrap justify-between gap-4 border-t border-black/5">
+    <footer class="px-4 sm:px-6 lg:px-8 xl:px-10 py-8 pb-24 md:pb-8 mono text-xs opacity-60 max-w-[1600px] mx-auto flex flex-wrap justify-between gap-4 border-t border-black/5">
       <span>© 2026 MIRACLE — @miracleechoes • 28 Posts • {{ isDe ? 'Oberösterreich' : 'Upper Austria' }}</span>
       <span class="flex gap-4"><a href="https://www.instagram.com/miracleechoes/" target="_blank" class="underline inline-flex items-center gap-1"><svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8"/></svg> Instagram</a> <a href="https://www.instagram.com/hannah_rumetshofer/" target="_blank" class="underline">Hannah</a> <a href="https://www.instagram.com/sophie.fsdr/" target="_blank" class="underline">Sophie</a> <a href="https://codepen.io/msaetre/pen/eYwqrb" target="_blank" class="underline opacity-70">🪩 by msaetre</a></span>
     </footer>
@@ -254,6 +259,15 @@ const posts = ref([
   { display_url:'/images/post_08.jpg', caption:'WALLS (aka. fav crash out song) Cover💜 @electricleona', url:'https://www.instagram.com/miracleechoes/reel/DMxxV1mIcAT/', date:'2026', type:'REEL' },
 ])
 
+let lenis = null
+function go(hash){
+  const el = document.querySelector(hash)
+  if(!el) return
+  try { history.pushState(null, '', hash) } catch {}
+  if(lenis) lenis.scrollTo(el, { offset: -70, duration: 1.2 })
+  else el.scrollIntoView({ behavior: 'smooth' })
+}
+
 const preloader = ref(null)
 const nav = ref(null)
 const heroTitle = ref(null)
@@ -282,28 +296,18 @@ onMounted(()=>{
     const el=document.getElementById(id)
     if(el) observer.observe(el)
   })
-  // disco ball - simple, no JS transform, just CSS swing/bob
-  // make disco draggable
-  if(discoWrap){
-    let isDragging=false, startX=0
-    discoWrap.addEventListener('pointerdown', (e)=>{ isDragging=true; startX=e.clientX; discoWrap.setPointerCapture(e.pointerId); discoWrap.style.cursor='grabbing' })
-    window.addEventListener('pointermove', (e)=>{
-      if(!isDragging) return
-      const dx = e.clientX - startX
-      discoWrap.style.transform = `translateX(calc(-50% + ${dx*0.3}px))`
-    })
-    window.addEventListener('pointerup', ()=>{ isDragging=false; if(discoWrap) discoWrap.style.cursor='grab' })
-  }
+  // disco ball is decorative behind everything (CSS spin only, no drag)
   // lenis
   const isMobile = window.innerWidth < 768
-  const lenis = new Lenis({ duration: isMobile ? 0.8 : 1.0, easing:t=>Math.min(1,1.001-Math.pow(2,-10*t)), smoothTouch:false })
+  lenis = new Lenis({ duration: isMobile ? 0.8 : 1.0, easing:t=>Math.min(1,1.001-Math.pow(2,-10*t)), smoothTouch:false })
   // lenis scroll without disco flicker
   function raf(t){ lenis.raf(t); requestAnimationFrame(raf)} requestAnimationFrame(raf)
-  const tl=gsap.timeline({delay:0.3})
-  tl.to('.pre-char',{y:0,duration:0.7,stagger:0.05,ease:'expo.out'})
-  tl.to(preloader.value,{yPercent:-100,duration:0.8,ease:'expo.inOut'},0.9)
-  tl.to(nav.value,{opacity:1,duration:0.5},1.1)
-  tl.to('.hero-char',{y:0,duration:0.8,stagger:0.04,ease:'expo.out'},1.0)
+  const tl=gsap.timeline({delay:0.1})
+  tl.to('.pre-char',{y:0,duration:0.5,stagger:0.04,ease:'expo.out'})
+  tl.to(preloader.value,{yPercent:-100,duration:0.6,ease:'expo.inOut'},0.6)
+  tl.to(nav.value,{opacity:1,duration:0.5},0.8)
+  tl.to('.hero-char',{y:0,duration:0.8,stagger:0.04,ease:'expo.out'},0.7)
+  setTimeout(()=>{ if(preloader.value) gsap.set(preloader.value,{display:'none'}) }, 4000)
   gsap.set('.pre-char',{y:'100%'})
   gsap.set('.hero-char',{y:'100%'})
   if(blob1.value) gsap.to(blob1.value,{x:12,y:-8,duration:3.5,yoyo:true,repeat:-1,ease:'sine.inOut'})
@@ -425,18 +429,9 @@ html{width:100%;height:100%}
   position: absolute;
   transform: rotateX(90deg) rotateY(0deg) translateZ(0px);
 }
-
-
-@keyframes swing{0%{transform:translateX(-50%) rotate(-2deg)}50%{transform:translateX(-50%) rotate(2deg)}100%{transform:translateX(-50%) rotate(-2deg)}}
-@media(max-width:768px){@keyframes swing{0%{transform:translateX(-50%) rotate(-1deg)}50%{transform:translateX(-50%) rotate(1deg)}100%{transform:translateX(-50%) rotate(-1deg)}}}
 @keyframes floatNote{0%{transform:translateY(0px) translateX(0px) rotate(var(--r,0deg))}50%{transform:translateY(-18px) translateX(var(--tx,0px)) rotate(var(--r,0deg))}100%{transform:translateY(0px) translateX(0px) rotate(var(--r,0deg))}}
 @keyframes swingStaff{0%{transform:rotate(-1.5deg)}50%{transform:rotate(1.5deg)}100%{transform:rotate(-1.5deg)}}
 @keyframes waveFlag{0%{transform: skewY(0deg) translateX(0px)}25%{transform: skewY(0.8deg) translateX(1px)}50%{transform: skewY(-0.6deg) translateX(-1px)}75%{transform: skewY(0.5deg) translateX(0.5px)}100%{transform: skewY(0deg) translateX(0px)}}
-@keyframes bob{0%{transform:translateX(-50%) translateY(0px)}50%{transform:translateX(-50%) translateY(4px)}100%{transform:translateX(-50%) translateY(0px)}}
-@keyframes rotateDiscoBall{0%{transform:rotateX(90deg) rotateY(0deg)}100%{transform:rotateX(90deg) rotateY(360deg)}}
-@keyframes rotateDiscoBallMiddle{0%{transform:rotateX(90deg) rotateY(0deg)}100%{transform:rotateX(90deg) rotateY(-360deg)}}
-
-@keyframes rotateDiscoBallMiddle{0%{transform:rotateX(90deg) rotateY(0deg)}100%{transform:rotateX(90deg) rotateY(-360deg)}}
 
 
 @-webkit-keyframes rotateDiscoBall {
