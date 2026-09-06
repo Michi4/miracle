@@ -376,7 +376,7 @@ html{width:100%;height:100%}
 @keyframes swingStaff{0%{transform:rotate(-1.5deg)}50%{transform:rotate(1.5deg)}100%{transform:rotate(-1.5deg)}}
 @keyframes waveFlag{0%{transform: skewY(0deg) translateX(0px)}25%{transform: skewY(0.8deg) translateX(1px)}50%{transform: skewY(-0.6deg) translateX(-1px)}75%{transform: skewY(0.5deg) translateX(0.5px)}100%{transform: skewY(0deg) translateX(0px)}}
 @keyframes bob{0%{transform:translateX(-50%) translateY(0px)}50%{transform:translateX(-50%) translateY(4px)}100%{transform:translateX(-50%) translateY(0px)}}
-@keyframes rotateDiscoBall{0%{transform:rotateX(90deg) rotateZ(0deg)}100%{transform:rotateX(90deg) rotateZ(360deg)}}
+@keyframes rotateDiscoBall{0%{transform:rotateX(90deg) rotateY(0deg)}100%{transform:rotateX(90deg) rotateY(360deg)}}
 @keyframes rotateDiscoBallMiddle{0%{transform:rotateX(90deg) rotateY(0deg)}100%{transform:rotateX(90deg) rotateY(-360deg)}}
 
 @keyframes rotateDiscoBallMiddle{0%{transform:rotateX(90deg) rotateY(0deg)}100%{transform:rotateX(90deg) rotateY(-360deg)}}
