@@ -68,9 +68,9 @@
     <a href="https://www.instagram.com/miracleechoes/" target="_blank" class="ml-1 bg-[#FF3B2F] px-4 py-1.5 rounded-full font-bold inline-flex items-center gap-1.5 hover:bg-white hover:text-black transition"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg> Instagram</a>
   </nav>
   <div class="fixed bottom-4 bottom-[max(1rem,env(safe-area-inset-bottom))] left-1/2 -translate-x-1/2 z-40 flex md:hidden items-center gap-1 px-2 py-2 rounded-full bg-black text-white mono text-[11px] tracking-widest shadow-[0_8px_30px_rgba(0,0,0,0.3)] max-w-[calc(100vw-2rem)]">
-    <a href="#about" @click.prevent="go('#about')" :class="active==='about' ? 'bg-white text-black' : 'border border-white/20'" class="px-3 py-1.5 rounded-full transition whitespace-nowrap">{{ isDe ? 'ÜBER' : 'ABOUT' }}</a>
-    <a href="#music" @click.prevent="go('#music')" :class="active==='music' ? 'bg-white text-black' : 'border border-white/20'" class="px-3 py-1.5 rounded-full transition">REELS</a>
-    <a href="#live" @click.prevent="go('#live')" :class="active==='live' ? 'bg-white text-black' : 'border border-white/20'" class="px-3 py-1.5 rounded-full transition">LIVE</a>
+    <a href="#about" @click.prevent="go('#about')" :class="active==='about' ? 'bg-white text-black border-white' : 'border-white/20'" class="px-3 py-1.5 rounded-full border transition whitespace-nowrap">{{ isDe ? 'ÜBER' : 'ABOUT' }}</a>
+    <a href="#music" @click.prevent="go('#music')" :class="active==='music' ? 'bg-white text-black border-white' : 'border-white/20'" class="px-3 py-1.5 rounded-full border transition">REELS</a>
+    <a href="#live" @click.prevent="go('#live')" :class="active==='live' ? 'bg-white text-black border-white' : 'border-white/20'" class="px-3 py-1.5 rounded-full border transition">LIVE</a>
     <button @click="locale = locale==='de' ? 'en' : 'de'" class="px-3 py-1.5 rounded-full border border-white/20 transition shrink-0">{{ locale==='de' ? 'EN' : 'DE' }}</button>
     <a href="https://www.instagram.com/miracleechoes/" target="_blank" aria-label="Instagram" class="bg-[#FF3B2F] w-8 h-8 grid place-items-center rounded-full shrink-0"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/></svg></a>
   </div>
@@ -83,7 +83,7 @@
 
   <main class="relative">
     <!-- HERO - perfect first view -->
-    <section id="about" class="relative min-h-[100vh] min-h-[100dvh] flex flex-col justify-center px-4 sm:px-6 lg:px-8 xl:px-10 pt-24 pb-6 overflow-hidden">
+    <section id="about" class="relative min-h-[100vh] min-h-[100svh] flex flex-col justify-center px-4 sm:px-6 lg:px-8 xl:px-10 pt-24 pb-6 overflow-hidden">
       <div class="absolute bottom-[14%] left-[4%] hidden lg:block pointer-events-none opacity-50">
         
       </div>
@@ -227,13 +227,13 @@
     </footer>
   </main>
 
-  <div v-if="isAdmin" class="fixed inset-0 z-[90] overflow-y-auto overscroll-contain">
+  <div v-if="isAdmin" data-lenis-prevent class="fixed inset-0 z-[90] overflow-y-auto overscroll-contain">
     <AdminView @close="closeAdmin" @gigs-changed="reloadGigs" @live-changed="reloadLive" />
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, computed, defineAsyncComponent } from 'vue'
+import { ref, onMounted, computed, defineAsyncComponent, watch } from 'vue'
 import gsap from 'gsap'
 import Lenis from 'lenis'
 
@@ -300,6 +300,13 @@ function closeAdmin(){
   isAdmin.value = false
   try { history.replaceState(null, '', window.location.pathname) } catch {}
 }
+// background scroll lock while admin is open (overlay scrolls via data-lenis-prevent)
+watch(isAdmin, (open)=>{
+  try {
+    if (open) { try { lenis && lenis.stop() } catch {} document.body.style.overflow = 'hidden' }
+    else { document.body.style.overflow = ''; try { lenis && lenis.start() } catch {} }
+  } catch {}
+})
 
 const posts = ref([
   { display_url:'/images/post_01.jpg', caption:'Ein MIRACLE Classic 🫶🏻 Auch am Freitag 07.08. am Kirchdorfer Stadtspektakel zu hören! Stagetime: 19:00Uhr⭐️ #music #cover #scarypockets #singing #guitar', url:'https://www.instagram.com/miracleechoes/reel/DbtYTr4umA3/', date:'', type:'REEL' },
@@ -458,7 +465,7 @@ onMounted(()=>{
 
 <style>
 * { scrollbar-width: thin; }
-html { scroll-behavior: auto; }
+html { scroll-behavior: auto; scrollbar-gutter: stable; }
 .will-change-transform { will-change: transform; }
 .instrument{font-family:"Instrument Serif", Georgia, serif}
 .mono{font-family:"JetBrains Mono", Menlo, monospace}
