@@ -15,14 +15,18 @@ async function req(method, path, body, withCsrf = false) {
   })
   let j = null
   try { j = await r.json() } catch { /* ignore */ }
-  if (!r.ok) throw new Error((j && j.error) || ('Fehler ' + r.status))
+  if (!r.ok) {
+    const err = new Error((j && j.error) || ('Fehler ' + r.status))
+    err.status = r.status
+    throw err
+  }
   return j
 }
 
 const num = (v) => (Number.isFinite(Number(v)) && Number(v) > 0 ? Number(v) : 0)
 
-export async function fetchGigs() {
-  return req('GET', '/api/gigs')
+export async function fetchGigs(fresh = false) {
+  return req('GET', '/api/gigs' + (fresh ? '?t=' + Date.now() : ''))
 }
 
 // IG thumbnail via same-origin CDN proxy (avoids cross-origin blocking).
@@ -33,8 +37,8 @@ export function thumb(u) {
   return '/ig/' + m[1] + '/' + m[2]
 }
 
-export async function fetchLive() {
-  const j = await req('GET', '/api/live')
+export async function fetchLive(fresh = false) {
+  const j = await req('GET', '/api/live' + (fresh ? '?t=' + Date.now() : ''))
   const acc = (key, fb) => {
     const a = (j.accounts && j.accounts[key]) || {}
     return {
@@ -52,15 +56,18 @@ export async function fetchLive() {
     hannah: acc('hannah', { posts: 12, followers: 307, following: 0 }),
     sophie: acc('sophie', { posts: 19, followers: 741, following: 0 }),
     media: Array.isArray(j.media) ? j.media.map((m) => ({
+      id: m.id || m.url,
       display_url: thumb(m.image),
       caption: m.caption || '',
       url: m.url,
       date: m.date || '',
       type: m.type === 'PHOTO' ? 'PHOTO' : 'REEL',
+      addedAt: m.addedAt || null,
     })).filter((m) => m.display_url && m.url) : [],
     graph: !!j.graph,
     // LIVE badge only with genuinely fresh data, never on fallbacks
     syncedAt: rawLive ? (j.syncedAt || null) : null,
+    checkedAt: j.checkedAt || null,
   }
 }
 
@@ -93,4 +100,10 @@ export async function apiDeleteGig(id) {
 }
 export async function apiTriggerSync() {
   return req('POST', '/api/admin/sync', {}, true)
+}
+export async function apiAddReel(url) {
+  return req('POST', '/api/admin/reels', { url }, true)
+}
+export async function apiDeleteReel(id) {
+  return req('DELETE', '/api/admin/reels/' + encodeURIComponent(id), undefined, true)
 }

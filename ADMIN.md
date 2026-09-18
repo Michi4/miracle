@@ -38,7 +38,7 @@ Neue Reels erscheinen **von allein**, sobald ihr den offiziellen Instagram-Zugan
 6. `IG_ACCESS_TOKEN` und `IG_USER_ID` in `.env.secrets` eintragen + `docker compose up -d miracle-api`.
 7. Im Admin-Status steht dann „offizielle API (Reels live)".
 
-Ohne Token: Zahlen live, Reels als feste Auswahl (wird bei Bedarf manuell aktualisiert).
+Ohne Token: Zahlen live, plus **Reels per Link**: im Admin bei „Reels live bringen" einfach den Instagram-Link eines neuen Posts/Reels einfügen — Text, Bild und Datum werden automatisch übernommen, das Reel steht sofort ganz oben auf der Seite. Löschen geht dort genauso (✕ → Ja).
 
 ## Sicherheit (fürs Protokoll)
 

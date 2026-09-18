@@ -9,6 +9,7 @@ import { getUserById, listGigs, insertGig, updateGig, deleteGig, seedGigsIfEmpty
 import { gigSchema, loginSchema, passwordSchema } from './validate.js'
 import { verifyLogin, openSession, readSession, closeSession, checkCsrf, hashPassword, checkPassword } from './auth.js'
 import { readCache, syncLive, startSyncLoop } from './live.js'
+import { extractShortcode, fetchPostMeta, listCustomReels, findCustomReel, addCustomReel, removeCustomReel } from './reels.js'
 
 // Seed gigs: repo layout (../src/gigs.js) in dev, ./seed-gigs.js in the container.
 let allGigs = [
@@ -55,6 +56,16 @@ export function createApp() {
   app.use(helmet({ contentSecurityPolicy: false, crossOriginEmbedderPolicy: false }))
   app.use(express.json({ limit: '50kb' }))
   app.use((req, _res, next) => { req.cookies = parseCookies(req); next() })
+  if (process.env.ACCESS_LOG !== '0') {
+    app.use((req, res, next) => {
+      const t = Date.now()
+      res.on('finish', () => {
+        if (req.path === '/api/health') return
+        console.log(`[api] ${req.method} ${req.path} -> ${res.statusCode} (${Date.now() - t}ms)`)
+      })
+      next()
+    })
+  }
 
   const loginLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, max: 10,
@@ -88,8 +99,9 @@ export function createApp() {
   app.get('/api/live', (_req, res) => {
     res.set('Cache-Control', 'public, max-age=300')
     const c = readCache()
-    if (c) return res.json(c)
-    res.json({ accounts: { band: null, hannah: null, sophie: null }, media: [], graph: false, syncedAt: null })
+    const custom = listCustomReels()
+    if (c) return res.json({ ...c, media: [...custom, ...(c.media || [])], syncedAt: c.syncedAt || custom[0]?.addedAt || null })
+    res.json({ accounts: { band: null, hannah: null, sophie: null }, media: custom, graph: false, syncedAt: custom[0]?.addedAt || null, checkedAt: null })
   })
 
   // ---- auth ----
@@ -144,6 +156,24 @@ export function createApp() {
     const id = validId(req.params.id)
     if (!id) return res.status(400).json({ error: 'Ungültige ID.' })
     if (!deleteGig(id)) return res.status(404).json({ error: 'Gig nicht gefunden.' })
+    res.json({ ok: true })
+  })
+
+  app.post('/api/admin/reels', needAuth, needCsrf, writeLimiter, async (req, res) => {
+    const url = String(req.body?.url || '').trim().slice(0, 500)
+    const id = extractShortcode(url)
+    if (!id) return res.status(400).json({ error: 'Das ist kein Instagram Post-/Reel-Link.' })
+    if (findCustomReel(id)) return res.status(409).json({ error: 'Dieser Post ist schon auf der Seite.' })
+    let meta = null
+    try { meta = await fetchPostMeta(url) } catch { meta = null }
+    if (!meta) return res.status(502).json({ error: 'Instagram liefert gerade keine Daten — später nochmal versuchen.' })
+    res.status(201).json({ reel: addCustomReel(meta) })
+  })
+
+  app.delete('/api/admin/reels/:id', needAuth, needCsrf, writeLimiter, (req, res) => {
+    const id = String(req.params.id || '')
+    if (!/^[A-Za-z0-9_-]{5,30}$/.test(id)) return res.status(400).json({ error: 'Ungültige ID.' })
+    if (!removeCustomReel(id)) return res.status(404).json({ error: 'Nicht gefunden.' })
     res.json({ ok: true })
   })
 

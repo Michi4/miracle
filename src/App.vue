@@ -166,7 +166,7 @@
       <div class="max-w-[1600px] mx-auto relative">
         <div class="flex flex-wrap justify-between gap-4 items-end">
           <div>
-            <div class="mono text-[11px] tracking-[0.35em] opacity-60">{{ isDe ? 'REELS — VON @miracleechoes' : 'REELS — FROM @miracleechoes' }}<span v-if="live.syncedAt" class="text-[#3ddc84]"> ● LIVE</span></div>
+            <div class="mono text-[11px] tracking-[0.35em] opacity-60">{{ isDe ? 'REELS — VON @miracleechoes' : 'REELS — FROM @miracleechoes' }}</div>
             <h2 class="instrument text-[10vw] lg:text-[5vw] leading-[0.85] mt-1">Reels</h2>
           </div>
           <a href="https://www.instagram.com/miracleechoes/" target="_blank" class="mono text-xs font-bold bg-white text-black px-6 py-3 rounded-full hover:bg-[#FF3B2F] hover:text-white transition inline-flex items-center gap-1.5"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/></svg> {{ isDe ? 'ALLE '+live.band.posts+' ANSEHEN' : 'SEE '+live.band.posts+' POSTS' }}</a>
@@ -227,8 +227,8 @@
     </footer>
   </main>
 
-  <div v-if="isAdmin" class="fixed inset-0 z-[90] overflow-y-auto">
-    <AdminView @close="closeAdmin" @gigs-changed="reloadGigs" />
+  <div v-if="isAdmin" class="fixed inset-0 z-[90] overflow-y-auto overscroll-contain">
+    <AdminView @close="closeAdmin" @gigs-changed="reloadGigs" @live-changed="reloadLive" />
   </div>
 </template>
 
@@ -258,13 +258,23 @@ const pastGigs = computed(()=>{
 })
 async function reloadGigs(){
   try {
-    const j = await fetchGigs()
+    const j = await fetchGigs(true) // always fresh: admin edits must show instantly (browser caches /api for 5 min)
     if (j && Array.isArray(j.gigs) && j.gigs.length) apiGigs.value = j.gigs
   } catch { /* baked-in fallback stays */ }
 }
+async function reloadLive(){
+  try { applyLive(await fetchLive(true)) } catch { /* fallback stays */ }
+}
 // live Instagram data (counts + reels) with baked-in fallbacks
 const live = ref({ band:{posts:28,followers:302,following:95}, hannah:{posts:12,followers:307,following:0}, sophie:{posts:19,followers:741,following:0}, media:[], syncedAt:null, graph:false })
-const displayPosts = computed(()=> live.value.media.length ? live.value.media : posts.value)
+function normUrl(u){ return String(u || '').split('?')[0].replace(/\/$/, '').toLowerCase() }
+// live/new reels first, then the built-in selection (deduplicated), max 12 cards
+const displayPosts = computed(()=>{
+  const liveMedia = live.value.media
+  if (!liveMedia.length) return posts.value
+  const seen = new Set(liveMedia.map(m=>normUrl(m.url)))
+  return [...liveMedia, ...posts.value.filter(b=>!seen.has(normUrl(b.url)))].slice(0, 12)
+})
 function applyLive(l){
   if (!l) return
   for (const k of ['band','hannah','sophie']) {
@@ -345,9 +355,22 @@ onMounted(()=>{
   // disco ball is decorative behind everything (CSS spin only, no drag)
   // lenis
   const isMobile = window.innerWidth < 768
-  try { lenis = new Lenis({ duration: isMobile ? 0.8 : 1.0, easing:t=>Math.min(1,1.001-Math.pow(2,-10*t)), smoothTouch:false }) } catch(e){ lenis = null }
-  // lenis scroll without disco flicker
-  function raf(t){ lenis.raf(t); requestAnimationFrame(raf)} requestAnimationFrame(raf)
+  // touch-primary devices (phones/tablets): native momentum scroll.
+  // Lenis only runs with a fine pointer (mouse) — avoids dead-scroll states from animation libs on mobile engines.
+  const coarseOnly = (()=>{ try { return !!(window.matchMedia && window.matchMedia('(pointer: fine)').matches === false) } catch(e){ return false } })()
+  if (!coarseOnly) {
+    try { lenis = new Lenis({ duration: isMobile ? 0.8 : 1.0, easing:t=>Math.min(1,1.001-Math.pow(2,-10*t)), smoothTouch:false }) } catch(e){ lenis = null }
+  }
+  // guarded raf: if Lenis throws repeatedly (older engines), destroy it (removes its listeners) and fall back to native scroll
+  let rafErrs = 0
+  function raf(t){
+    if (lenis) {
+      try { lenis.raf(t) }
+      catch(e){ if (++rafErrs > 3) { try { lenis.destroy() } catch(_){} lenis = null; return } }
+    }
+    requestAnimationFrame(raf)
+  }
+  if (lenis) requestAnimationFrame(raf)
   try {
   const tl=gsap.timeline({delay:0.1})
   tl.to('.pre-char',{y:0,duration:0.5,stagger:0.04,ease:'expo.out'})

@@ -14,6 +14,7 @@ const { createApp } = await import('../index.js')
 const { gigSchema } = await import('../validate.js')
 const { parseCounts } = await import('../live.js')
 const { createUser, seedGigsIfEmpty } = await import('../store.js')
+const { extractShortcode, parsePostMeta, addCustomReel, removeCustomReel, listCustomReels } = await import('../reels.js')
 
 let base, jar
 
@@ -96,4 +97,51 @@ test('full auth + gig CRUD + password change', async () => {
   assert.equal((await api('POST', '/api/auth/login', { username: 'sophie', password: 'geheim-12345-super' })).status, 401)
   const re = await api('POST', '/api/auth/login', { username: 'sophie', password: 'neues-geheimes-pw' })
   assert.equal(re.status, 200)
+})
+
+test('extractShortcode validates reel/post links', async () => {
+  const { extractShortcode: ex } = await import('../reels.js')
+  assert.equal(ex('https://www.instagram.com/miracleechoes/reel/DMxxV1mIcAT/'), 'DMxxV1mIcAT')
+  assert.equal(ex('https://www.instagram.com/p/DVRl4IqCBFo/?img_index=1'), 'DVRl4IqCBFo')
+  assert.equal(ex('https://instagram.com/miracleechoes/reels/ABC_def-123/'), 'ABC_def-123')
+  assert.equal(ex('https://www.instagram.com/miracleechoes/'), null)
+  assert.equal(ex('https://evil.com/p/ABCDEF12345/'), null)
+  assert.equal(ex('not a url'), null)
+  assert.equal(ex(''), null)
+})
+
+test('parsePostMeta reads post og tags', async () => {
+  const { parsePostMeta: parse } = await import('../reels.js')
+  const html = '<meta property="og:title" content="MIRACLE on Instagram: &quot;WALLS Cover&#x1f49c; &#064;electricleona&quot;" />'
+    + '<meta property="og:image" content="https://scontent-fra3-1.cdninstagram.com/v/x.jpg?stp=dst&amp;oh=abc" />'
+    + '<meta property="og:url" content="https://www.instagram.com/miracleechoes/reel/DMxxV1mIcAT/" />'
+    + '<meta property="og:description" content="62 likes, 4 comments - miracleechoes on July 31, 2025: &quot;WALLS&quot;" />'
+  const r = parse(html, 'https://www.instagram.com/miracleechoes/reel/DMxxV1mIcAT/')
+  assert.equal(r.id, 'DMxxV1mIcAT')
+  assert.equal(r.type, 'REEL')
+  assert.equal(r.caption, 'WALLS Cover💜 @electricleona')
+  assert.ok(r.image.includes('scontent-fra3-1.cdninstagram.com') && r.image.includes('&oh=abc'))
+  assert.equal(r.date, '31.07.2025')
+  assert.equal(parse('<html></html>', 'https://www.instagram.com/p/ABCDEF12345/'), null)
+  assert.equal(parse(html, 'https://www.instagram.com/miracleechoes/'), null)
+})
+
+test('custom reels store roundtrip', async () => {
+  const { addCustomReel: add, removeCustomReel: del, listCustomReels: list } = await import('../reels.js')
+  add({ id: 'TEST1234567', image: 'https://x.cdninstagram.com/a.jpg', caption: 'Hi', url: 'https://www.instagram.com/p/TEST1234567/', type: 'PHOTO', date: '01.01.2027', addedAt: new Date().toISOString() })
+  assert.ok(list().some((r) => r.id === 'TEST1234567'))
+  assert.equal(del('TEST1234567'), true)
+  assert.equal(del('TEST1234567'), false)
+})
+
+test('reels endpoints: auth + validation', async () => {
+  jar = ''
+  assert.equal((await api('POST', '/api/admin/reels', { url: 'https://www.instagram.com/p/ABCDEF12345/' })).status, 401)
+  assert.equal((await api('DELETE', '/api/admin/reels/ABCDEF12345')).status, 401)
+  const login = await api('POST', '/api/auth/login', { username: 'sophie', password: 'neues-geheimes-pw' })
+  assert.equal(login.status, 200)
+  const csrf = login.json.csrf
+  assert.equal((await api('POST', '/api/admin/reels', { url: 'https://www.instagram.com/miracleechoes/' }, csrf)).status, 400)
+  assert.equal((await api('POST', '/api/admin/reels', { url: 'https://evil.com/p/ABCDEF12345/' }, csrf)).status, 400)
+  assert.equal((await api('DELETE', '/api/admin/reels/NOPE-NOT-HERE-1', null, csrf)).status, 404)
 })
