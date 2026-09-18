@@ -1,5 +1,5 @@
 // Pure gig-date logic (framework-free so it can be unit-tested).
-// Dates are strings in DD.MM.YYYY (Austrian format), shows at 19:00 local.
+// Dates are strings in DD.MM.YYYY (European format), shows at 19:00 local.
 
 export const allGigs = [
   { date:'07.08.2025', place:'Kirchdorfer Stadtspektakel', city:'Kirchdorf', note:'Stagetime 19:00 — Ein MIRACLE Classic', link:'https://www.instagram.com/miracleechoes/reel/DbtYTr4umA3/' },

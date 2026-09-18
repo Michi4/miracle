@@ -67,7 +67,7 @@
     <button @click="locale = locale==='de' ? 'en' : 'de'" class="px-3 py-1.5 rounded-full border border-white/20 hover:bg-white hover:text-black transition whitespace-nowrap shrink-0">{{ locale==='de' ? 'EN' : 'DE' }}</button>
     <a href="https://www.instagram.com/miracleechoes/" target="_blank" class="ml-1 bg-[#FF3B2F] px-4 py-1.5 rounded-full font-bold inline-flex items-center gap-1.5 hover:bg-white hover:text-black transition"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg> Instagram</a>
   </nav>
-  <div class="fixed bottom-[max(1rem,env(safe-area-inset-bottom))] left-1/2 -translate-x-1/2 z-40 flex md:hidden items-center gap-1 px-2 py-2 rounded-full bg-black text-white mono text-[11px] tracking-widest shadow-[0_8px_30px_rgba(0,0,0,0.3)] max-w-[calc(100vw-2rem)]">
+  <div class="fixed bottom-4 bottom-[max(1rem,env(safe-area-inset-bottom))] left-1/2 -translate-x-1/2 z-40 flex md:hidden items-center gap-1 px-2 py-2 rounded-full bg-black text-white mono text-[11px] tracking-widest shadow-[0_8px_30px_rgba(0,0,0,0.3)] max-w-[calc(100vw-2rem)]">
     <a href="#about" @click.prevent="go('#about')" :class="active==='about' ? 'bg-white text-black' : 'border border-white/20'" class="px-3 py-1.5 rounded-full transition whitespace-nowrap">{{ isDe ? 'ÜBER' : 'ABOUT' }}</a>
     <a href="#music" @click.prevent="go('#music')" :class="active==='music' ? 'bg-white text-black' : 'border border-white/20'" class="px-3 py-1.5 rounded-full transition">REELS</a>
     <a href="#live" @click.prevent="go('#live')" :class="active==='live' ? 'bg-white text-black' : 'border border-white/20'" class="px-3 py-1.5 rounded-full transition">LIVE</a>
@@ -83,7 +83,7 @@
 
   <main class="relative">
     <!-- HERO - perfect first view -->
-    <section id="about" class="relative min-h-[100dvh] flex flex-col justify-center px-4 sm:px-6 lg:px-8 xl:px-10 pt-24 pb-6 overflow-hidden">
+    <section id="about" class="relative min-h-[100vh] min-h-[100dvh] flex flex-col justify-center px-4 sm:px-6 lg:px-8 xl:px-10 pt-24 pb-6 overflow-hidden">
       <div class="absolute bottom-[14%] left-[4%] hidden lg:block pointer-events-none opacity-50">
         
       </div>
@@ -110,7 +110,7 @@
               <div class="min-w-0">
                 <div class="mono text-[10px] tracking-widest opacity-60">GITARRE</div>
                 <div class="font-black leading-none truncate">hannah_rumetshofer</div>
-                <div class="mono text-xs opacity-60 flex items-center gap-1"><svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/></svg> 12 Posts • 307 Follower</div>
+                <div class="mono text-xs opacity-60 flex items-center gap-1"><svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/></svg> {{ live.hannah.posts }} Posts • {{ live.hannah.followers }} Follower</div>
               </div>
               <span class="ml-auto w-8 h-8 rounded-full bg-black text-white grid place-items-center group-hover:bg-[#FF3B2F] transition shrink-0">↗</span>
             </a>
@@ -120,7 +120,7 @@
               <div class="min-w-0">
                 <div class="mono text-[10px] tracking-widest opacity-50">GESANG</div>
                 <div class="font-black leading-none truncate">sophie.fsdr</div>
-                <div class="mono text-xs opacity-70 flex items-center gap-1"><svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/></svg> 19 Posts • 741 Follower</div>
+                <div class="mono text-xs opacity-70 flex items-center gap-1"><svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/></svg> {{ live.sophie.posts }} Posts • {{ live.sophie.followers }} Follower</div>
               </div>
               <span class="ml-auto w-8 h-8 rounded-full bg-white text-black grid place-items-center shrink-0">↗</span>
             </a>
@@ -166,15 +166,15 @@
       <div class="max-w-[1600px] mx-auto relative">
         <div class="flex flex-wrap justify-between gap-4 items-end">
           <div>
-            <div class="mono text-[11px] tracking-[0.35em] opacity-60">{{ isDe ? 'REELS — VON @miracleechoes' : 'REELS — FROM @miracleechoes' }}</div>
+            <div class="mono text-[11px] tracking-[0.35em] opacity-60">{{ isDe ? 'REELS — VON @miracleechoes' : 'REELS — FROM @miracleechoes' }}<span v-if="live.syncedAt" class="text-[#3ddc84]"> ● LIVE</span></div>
             <h2 class="instrument text-[10vw] lg:text-[5vw] leading-[0.85] mt-1">Reels</h2>
           </div>
-          <a href="https://www.instagram.com/miracleechoes/" target="_blank" class="mono text-xs font-bold bg-white text-black px-6 py-3 rounded-full hover:bg-[#FF3B2F] hover:text-white transition inline-flex items-center gap-1.5"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/></svg> {{ isDe ? 'ALLE 28 ANSEHEN' : 'SEE 28 POSTS' }}</a>
+          <a href="https://www.instagram.com/miracleechoes/" target="_blank" class="mono text-xs font-bold bg-white text-black px-6 py-3 rounded-full hover:bg-[#FF3B2F] hover:text-white transition inline-flex items-center gap-1.5"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/></svg> {{ isDe ? 'ALLE '+live.band.posts+' ANSEHEN' : 'SEE '+live.band.posts+' POSTS' }}</a>
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
-          <a v-for="post in posts" :key="post.url" :href="post.url" target="_blank" class="group bg-[#1A1A1E] rounded-[28px] overflow-hidden border border-white/10 hover:border-white/20 hover:-translate-y-1 transition flex flex-col">
-            <div class="relative bg-black overflow-hidden aspect-[4/5]">
-              <img :src="post.display_url" alt="" class="w-full h-full object-cover group-hover:scale-[1.03] transition duration-700" loading="lazy"/>
+          <a v-for="post in displayPosts" :key="post.url" :href="post.url" target="_blank" class="group bg-[#1A1A1E] rounded-[28px] overflow-hidden border border-white/10 hover:border-white/20 hover:-translate-y-1 transition flex flex-col">
+            <div class="relative bg-black overflow-hidden aspect-[4/5] reel-frame">
+              <img :src="post.display_url" alt="" class="w-full h-full object-cover group-hover:scale-[1.03] transition duration-700" loading="lazy" @error="imgFallback"/>
               <div class="absolute top-3 left-3 mono text-[10px] tracking-widest bg-white text-black px-3 py-1 rounded-full font-bold">{{post.type}}</div>
               <div class="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/60 backdrop-blur border border-white/20 grid place-items-center text-white text-xs">↗</div>
             </div>
@@ -201,7 +201,7 @@
           <div>
             <div class="inline-flex items-center gap-2 mono text-[11px] font-bold bg-black text-white px-3 py-1.5 rounded-full">{{ isDe ? 'NÄCHSTER GIG' : 'NEXT UP' }} — {{ nextGig.date }}</div>
             <div class="instrument text-4xl md:text-5xl leading-none mt-3">{{ nextGig.place }}<br><span class="text-[#FF3B2F]">{{ nextGig.city }}</span></div>
-            <div class="mono text-xs opacity-60 mt-2">{{ nextGig.note }} • {{ isDe ? 'Oberösterreich' : 'Upper Austria' }}</div>
+            <div class="mono text-xs opacity-60 mt-2">{{ nextGig.note }} • MIRACLE</div>
           </div>
           <a :href="nextGig.link" target="_blank" class="mono text-xs font-bold bg-black text-white px-7 py-3.5 rounded-full hover:bg-[#FF3B2F] transition inline-flex items-center gap-1.5"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/></svg> {{ isDe ? 'INFOS' : 'INFO' }}</a>
         </div>
@@ -215,34 +215,81 @@
           </div>
         </div>
         <div class="bg-black text-white px-6 py-4 mono text-xs flex flex-wrap justify-between gap-3">
-          <span class="opacity-70">{{ isDe ? 'Mehr Shows → folge @miracleechoes' : 'More shows → follow @miracleechoes' }} • 28 Posts</span>
+          <span class="opacity-70">{{ isDe ? 'Mehr Shows → folge @miracleechoes' : 'More shows → follow @miracleechoes' }} • {{ live.band.posts }} Posts</span>
           <a href="mailto:instagram.com/miracleechoes" class="underline decoration-[#FFD23F]">instagram.com/miracleechoes</a>
         </div>
       </div>
     </section>
 
     <footer class="px-4 sm:px-6 lg:px-8 xl:px-10 py-8 pb-24 md:pb-8 mono text-xs opacity-60 max-w-[1600px] mx-auto flex flex-wrap justify-between gap-4 border-t border-black/5">
-      <span>© 2026 MIRACLE — @miracleechoes • 28 Posts • {{ isDe ? 'Oberösterreich' : 'Upper Austria' }}</span>
-      <span class="flex gap-4"><a href="https://www.instagram.com/miracleechoes/" target="_blank" class="underline inline-flex items-center gap-1"><svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8"/></svg> Instagram</a> <a href="https://www.instagram.com/hannah_rumetshofer/" target="_blank" class="underline">Hannah</a> <a href="https://www.instagram.com/sophie.fsdr/" target="_blank" class="underline">Sophie</a> <a href="https://codepen.io/msaetre/pen/eYwqrb" target="_blank" class="underline opacity-70">🪩 by msaetre</a> <a href="https://websters.at" target="_blank" class="underline opacity-70">Website by websters.at</a></span>
+      <span>© 2026 MIRACLE — @miracleechoes • {{ live.band.posts }} Posts • Hannah & Sophie</span>
+      <span class="flex gap-4"><a href="https://www.instagram.com/miracleechoes/" target="_blank" class="underline inline-flex items-center gap-1"><svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8"/></svg> Instagram</a> <a href="https://www.instagram.com/hannah_rumetshofer/" target="_blank" class="underline">Hannah</a> <a href="https://www.instagram.com/sophie.fsdr/" target="_blank" class="underline">Sophie</a> <a href="https://codepen.io/msaetre/pen/eYwqrb" target="_blank" class="underline opacity-70">🪩 by msaetre</a> <a href="https://websters.at" target="_blank" class="underline opacity-70">Website by websters.at</a> <a href="#/admin" class="underline opacity-70">Admin</a></span>
     </footer>
   </main>
+
+  <div v-if="isAdmin" class="fixed inset-0 z-[90] overflow-y-auto">
+    <AdminView @close="closeAdmin" @gigs-changed="reloadGigs" />
+  </div>
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, defineAsyncComponent } from 'vue'
 import gsap from 'gsap'
 import Lenis from 'lenis'
+
+const AdminView = defineAsyncComponent(()=>import('./Admin.vue'))
 
 const locale = ref('de')
 const isDe = computed(()=> locale.value==='de')
 const active = ref('about')
 
 import { allGigs, splitGigs, pickNextGig, gigLabel, startOfDay } from './gigs.js'
+import { fetchGigs, fetchLive } from './api.js'
 const now = startOfDay(new Date())
-const { upcoming, past } = splitGigs(allGigs, now)
-const nextGig = computed(()=> pickNextGig(allGigs, now))
-const nextGigLabel = computed(()=> gigLabel(nextGig.value))
-const pastGigs = computed(()=> past.length ? past : allGigs.filter(g=> g.date !== nextGig.value.date).slice(0,4))
+// gigs come from the backend (admin-editable), baked-in list is the fallback
+const apiGigs = ref(null)
+const gigsSource = computed(()=> (apiGigs.value && apiGigs.value.length) ? apiGigs.value : allGigs)
+const nextGig = computed(()=> pickNextGig(gigsSource.value, now) || allGigs[0])
+const nextGigLabel = computed(()=> nextGig.value ? gigLabel(nextGig.value) : '')
+const pastGigs = computed(()=>{
+  const { past } = splitGigs(gigsSource.value, now)
+  const nd = nextGig.value ? nextGig.value.date : ''
+  return past.length ? past : gigsSource.value.filter(g=> g.date !== nd).slice(0,4)
+})
+async function reloadGigs(){
+  try {
+    const j = await fetchGigs()
+    if (j && Array.isArray(j.gigs) && j.gigs.length) apiGigs.value = j.gigs
+  } catch { /* baked-in fallback stays */ }
+}
+// live Instagram data (counts + reels) with baked-in fallbacks
+const live = ref({ band:{posts:28,followers:302,following:95}, hannah:{posts:12,followers:307,following:0}, sophie:{posts:19,followers:741,following:0}, media:[], syncedAt:null, graph:false })
+const displayPosts = computed(()=> live.value.media.length ? live.value.media : posts.value)
+function applyLive(l){
+  if (!l) return
+  for (const k of ['band','hannah','sophie']) {
+    const a = l[k]
+    if (a && a.posts > 0) live.value[k].posts = a.posts
+    if (a && a.followers > 0) live.value[k].followers = a.followers
+    if (a && a.following > 0) live.value[k].following = a.following
+  }
+  if (Array.isArray(l.media) && l.media.length) live.value.media = l.media
+  live.value.syncedAt = l.syncedAt || null
+  live.value.graph = !!l.graph
+}
+function imgFallback(e){
+  const t = e && e.target
+  if (!t || t.dataset.fb) return
+  t.dataset.fb = '1'
+  t.src = '/images/post_08.jpg'
+}
+// admin overlay (#/admin)
+const isAdmin = ref(false)
+function syncAdminRoute(){ try { isAdmin.value = window.location.hash === '#/admin' } catch { isAdmin.value = false } }
+function closeAdmin(){
+  isAdmin.value = false
+  try { history.replaceState(null, '', window.location.pathname) } catch {}
+}
 
 const posts = ref([
   { display_url:'/images/post_01.jpg', caption:'Ein MIRACLE Classic 🫶🏻 Auch am Freitag 07.08. am Kirchdorfer Stadtspektakel zu hören! Stagetime: 19:00Uhr⭐️ #music #cover #scarypockets #singing #guitar', url:'https://www.instagram.com/miracleechoes/reel/DbtYTr4umA3/', date:'', type:'REEL' },
@@ -260,7 +307,7 @@ function go(hash){
   const el = document.querySelector(hash)
   if(!el) return
   try { history.pushState(null, '', hash) } catch {}
-  if(lenis) lenis.scrollTo(el, { offset: -70, duration: 1.2 })
+  if(lenis){ try { lenis.scrollTo(el, { offset: -70, duration: 1.2 }) } catch { el.scrollIntoView({ behavior: 'smooth' }) } }
   else el.scrollIntoView({ behavior: 'smooth' })
 }
 
@@ -274,6 +321,13 @@ const blob3 = ref(null)
 onMounted(()=>{
   const lang = (navigator.language || '').toLowerCase()
   if(lang.startsWith('de')) locale.value='de'
+  // safety net: preloader ALWAYS lifts, even if animation libs fail (old devices)
+  setTimeout(()=>{ try { if(preloader.value) preloader.value.style.display='none' } catch(e){} }, 5000)
+  // admin route + backend data (non-blocking, baked-in fallbacks stay on failure)
+  syncAdminRoute()
+  try { window.addEventListener('hashchange', syncAdminRoute) } catch(e){}
+  reloadGigs()
+  fetchLive().then(applyLive).catch(()=>{})
   // auto select nav on scroll
   // navbar auto-select - deterministic scroll position (cannot skip sections)
   const sectionIds = ['about','music','live']
@@ -291,9 +345,10 @@ onMounted(()=>{
   // disco ball is decorative behind everything (CSS spin only, no drag)
   // lenis
   const isMobile = window.innerWidth < 768
-  lenis = new Lenis({ duration: isMobile ? 0.8 : 1.0, easing:t=>Math.min(1,1.001-Math.pow(2,-10*t)), smoothTouch:false })
+  try { lenis = new Lenis({ duration: isMobile ? 0.8 : 1.0, easing:t=>Math.min(1,1.001-Math.pow(2,-10*t)), smoothTouch:false }) } catch(e){ lenis = null }
   // lenis scroll without disco flicker
   function raf(t){ lenis.raf(t); requestAnimationFrame(raf)} requestAnimationFrame(raf)
+  try {
   const tl=gsap.timeline({delay:0.1})
   tl.to('.pre-char',{y:0,duration:0.5,stagger:0.04,ease:'expo.out'})
   tl.to(preloader.value,{yPercent:-100,duration:0.6,ease:'expo.inOut'},0.6)
@@ -305,9 +360,11 @@ onMounted(()=>{
   if(blob1.value) gsap.to(blob1.value,{x:12,y:-8,duration:3.5,yoyo:true,repeat:-1,ease:'sine.inOut'})
   if(blob2.value) gsap.to(blob2.value,{x:-10,y:10,duration:2.8,yoyo:true,repeat:-1,ease:'sine.inOut',delay:0.3})
   if(blob3.value) gsap.to(blob3.value,{x:8,y:12,duration:3.2,yoyo:true,repeat:-1,ease:'sine.inOut',delay:0.5})
+  } catch(e){ try { if(preloader.value) preloader.value.style.display='none' } catch(_){} }
   // disco ball - exact https://codepen.io/msaetre/pen/eYwqrb - perfect with light background
   // codepen disco ball - exact https://codepen.io/msaetre/pen/eYwqrb - no flicker (static tiles, smooth spin)
   // codepen disco ball - exact for Chrome, CSS fallback for Firefox (no flicker)
+  try {
   var discoWrap = document.getElementById('discoWrap')
   var ua = navigator.userAgent.toLowerCase()
   var isFirefox = ua.indexOf('firefox') > -1
@@ -372,6 +429,7 @@ onMounted(()=>{
     return Math.floor(Math.random() * (max - min + 1)) + min;
   }
   }
+  } catch(e){}
 })
 </script>
 
@@ -451,6 +509,10 @@ html{width:100%;height:100%}
     0% {opacity: 1;}
     50% {opacity: 0.4;}
     100% {opacity: 1;}
+}
+@supports not (aspect-ratio: 1/1) {
+  .reel-frame { height: 420px; }
+  .reel-frame img { height: 100%; }
 }
 #discoBallLight {
   width: 100px;

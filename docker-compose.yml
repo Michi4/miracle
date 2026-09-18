@@ -19,6 +19,26 @@ services:
     networks:
       - traefik
 
+  miracle-api:
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+    restart: unless-stopped
+    container_name: miracle-api
+    env_file:
+      - .env
+      - .env.secrets
+    environment:
+      - PORT=3000
+      - DB_PATH=/data/miracle.json
+    volumes:
+      - miracle-data:/data
+    networks:
+      - traefik
+
+volumes:
+  miracle-data:
+
 networks:
   traefik:
     external: true
