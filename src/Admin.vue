@@ -21,9 +21,15 @@
             <input v-model="form.username" type="text" autocomplete="username" autofocus class="mt-1 w-full border-[2px] border-black rounded-xl px-3 py-2 mono text-sm font-normal outline-none focus:shadow-[3px_3px_0px_#000]" />
           </label>
           <label class="mono text-xs font-bold">PASSWORT
-            <input v-model="form.password" type="password" autocomplete="current-password" class="mt-1 w-full border-[2px] border-black rounded-xl px-3 py-2 mono text-sm font-normal outline-none focus:shadow-[3px_3px_0px_#000]" />
+            <span class="relative block mt-1">
+              <input v-model="form.password" :type="showLogin ? 'text' : 'password'" autocomplete="current-password" class="w-full border-[2px] border-black rounded-xl pl-3 pr-10 py-2 mono text-sm font-normal outline-none focus:shadow-[3px_3px_0px_#000]" />
+              <button type="button" @click="showLogin = !showLogin" :aria-label="showLogin ? 'Passwort verbergen' : 'Passwort anzeigen'" class="absolute right-2 top-1/2 -translate-y-1/2 opacity-50 hover:opacity-100 transition p-1">
+                <svg v-if="!showLogin" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                <svg v-else viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+              </button>
+            </span>
           </label>
-          <div v-if="loginError" class="mono text-xs font-bold bg-[#FF3B2F] text-white px-3 py-2 rounded-xl">{{ loginError }}</div>
+          <div class="min-h-[2.5rem]"><div v-if="loginError" class="mono text-xs font-bold bg-[#FF3B2F] text-white px-3 py-2 rounded-xl">{{ loginError }}</div></div>
           <button type="submit" :disabled="busy" class="mono text-sm font-black bg-[#FFD23F] border-[2px] border-black px-5 py-2.5 rounded-full hover:shadow-[4px_4px_0px_#000] transition disabled:opacity-50">{{ busy ? 'Moment …' : 'Einloggen' }}</button>
         </form>
       </div>
@@ -35,12 +41,13 @@
             <div class="font-black text-lg">Instagram Live-Status</div>
             <button @click="doSync" :disabled="busy" class="mono text-xs font-bold bg-[#FFD23F] text-black px-4 py-2 rounded-full hover:bg-white transition disabled:opacity-50">{{ busy ? 'Moment …' : '↻ Jetzt syncen' }}</button>
           </div>
-          <div v-if="statusMsg" class="mono text-xs mt-2 opacity-80">{{ statusMsg }}</div>
+          <div class="mono text-xs mt-2 min-h-[1rem] opacity-80">{{ statusMsg }}</div>
           <div v-if="status" class="mono text-xs mt-3 flex flex-col gap-1.5">
-            <div>Datenstand: <b>{{ statusAgo }}</b> • Modus: <b>{{ status.graph ? 'offizielle API' : 'öffentlich' }}</b></div>
-            <div>@miracleechoes: <b>{{ status.band.followers }} Follower • {{ status.band.posts }} Posts</b></div>
-            <div class="opacity-70">hannah_rumetshofer: {{ status.hannah.followers }} Follower • {{ status.hannah.posts }} Posts</div>
-            <div class="opacity-70">sophie.fsdr: {{ status.sophie.followers }} Follower • {{ status.sophie.posts }} Posts</div>
+            <div>Letzter erfolgreicher Sync: <b>{{ status.syncedAt ? timeAgo(status.syncedAt) : 'noch nie' }}</b> • Modus: <b>{{ status.graph ? 'offizielle API' : 'öffentlich' }}</b></div>
+            <div v-if="!status.syncedAt" class="bg-[#FFD23F] text-black font-bold px-3 py-2 rounded-xl">Noch keine Live-Daten — Instagram blockiert unseren Server gerade (Rate-Limit). Wird alle 45 Min. erneut versucht. Zahlen unten sind gespeicherte Werte.</div>
+            <div>@miracleechoes: <b>{{ status.band.followers }} Follower • {{ status.band.posts }} Posts</b><span v-if="!status.syncedAt" class="opacity-60"> (gespeichert)</span></div>
+            <div class="opacity-70">hannah_rumetshofer: {{ status.hannah.followers }} Follower • {{ status.hannah.posts }} Posts<span v-if="!status.syncedAt"> (gespeichert)</span></div>
+            <div class="opacity-70">sophie.fsdr: {{ status.sophie.followers }} Follower • {{ status.sophie.posts }} Posts<span v-if="!status.syncedAt"> (gespeichert)</span></div>
             <div class="opacity-70">Reels auf der Seite: {{ status.media.length }} ({{ customCount }} per Link hinzugefügt)</div>
           </div>
         </section>
@@ -53,7 +60,7 @@
             <input v-model="reelUrl" type="url" inputmode="url" placeholder="https://www.instagram.com/miracleechoes/reel/…" class="flex-1 min-w-0 border-[2px] border-black rounded-xl px-3 py-2 mono text-xs outline-none focus:shadow-[3px_3px_0px_#000]" />
             <button type="submit" :disabled="busy || !reelUrl.trim()" class="mono text-xs font-black bg-black text-white px-5 py-2 rounded-full hover:bg-[#FF3B2F] transition disabled:opacity-50 shrink-0">{{ busy ? '…' : '+ Hinzufügen' }}</button>
           </form>
-          <div v-if="reelMsg" class="mono text-xs font-bold px-3 py-2 rounded-xl mt-3" :class="reelOk ? 'bg-green-600 text-white' : 'bg-[#FF3B2F] text-white'">{{ reelMsg }}</div>
+          <div class="mt-3 min-h-[2.75rem]"><div v-if="reelMsg" class="mono text-xs font-bold px-3 py-2 rounded-xl" :class="reelOk ? 'bg-green-600 text-white' : 'bg-[#FF3B2F] text-white'">{{ reelMsg }}</div></div>
           <div v-if="customReels.length" class="mt-3 grid grid-cols-2 sm:grid-cols-3 gap-2">
             <div v-for="r in customReels" :key="r.id" class="relative rounded-xl overflow-hidden border-2 border-black/10 bg-black">
               <img :src="r.display_url" :alt="r.caption.slice(0, 60)" class="w-full aspect-[4/5] object-cover" loading="lazy" />
@@ -75,8 +82,10 @@
         <section class="bg-white border-[2.5px] border-black rounded-[24px] p-6 shadow-[6px_6px_0px_#000]">
           <div class="font-black text-lg">Gigs verwalten</div>
           <p class="mono text-xs opacity-60 mt-1">Änderungen sind sofort auf der Seite live.</p>
-          <div v-if="gigError" class="mono text-xs font-bold bg-[#FF3B2F] text-white px-3 py-2 rounded-xl mt-3">{{ gigError }}</div>
-          <div v-if="gigOk" class="mono text-xs font-bold bg-green-600 text-white px-3 py-2 rounded-xl mt-3">{{ gigOk }}</div>
+          <div class="mt-3 min-h-[2.75rem]">
+            <div v-if="gigError" class="mono text-xs font-bold bg-[#FF3B2F] text-white px-3 py-2 rounded-xl">{{ gigError }}</div>
+            <div v-if="gigOk" class="mono text-xs font-bold bg-green-600 text-white px-3 py-2 rounded-xl">{{ gigOk }}</div>
+          </div>
 
           <div v-if="!gigs.length" class="mono text-xs opacity-60 mt-4 border-2 border-dashed border-black/20 rounded-2xl p-4 text-center">Noch keine Gigs — leg unten den ersten an.</div>
           <div class="mt-4 flex flex-col gap-2">
@@ -128,10 +137,18 @@
         <section class="bg-white border-[2.5px] border-black rounded-[24px] p-6">
           <div class="font-black text-lg">Passwort ändern</div>
           <form @submit.prevent="doPassword" class="mt-3 flex flex-col gap-2">
-            <label class="mono text-[11px] font-bold">AKTUELLES PASSWORT<input v-model="pw.current" type="password" autocomplete="current-password" class="mt-1 w-full border-2 border-black rounded-lg px-2 py-1.5 mono text-xs font-normal" /></label>
-            <label class="mono text-[11px] font-bold">NEUES PASSWORT (min. 10 Zeichen)<input v-model="pw.next" type="password" autocomplete="new-password" class="mt-1 w-full border-2 border-black rounded-lg px-2 py-1.5 mono text-xs font-normal" /></label>
-            <label class="mono text-[11px] font-bold">WIEDERHOLEN<input v-model="pw.repeat" type="password" autocomplete="new-password" class="mt-1 w-full border-2 border-black rounded-lg px-2 py-1.5 mono text-xs font-normal" /></label>
-            <div v-if="pwMsg" class="mono text-xs font-bold px-3 py-2 rounded-xl" :class="pwOk ? 'bg-green-600 text-white' : 'bg-[#FF3B2F] text-white'">{{ pwMsg }}</div>
+            <label class="mono text-[11px] font-bold">AKTUELLES PASSWORT
+              <span class="relative block mt-1">
+                <input v-model="pw.current" :type="showPw ? 'text' : 'password'" autocomplete="current-password" class="w-full border-2 border-black rounded-lg pl-2 pr-9 py-1.5 mono text-xs font-normal" />
+                <button type="button" @click="showPw = !showPw" :aria-label="showPw ? 'Passwörter verbergen' : 'Passwörter anzeigen'" class="absolute right-2 top-1/2 -translate-y-1/2 opacity-50 hover:opacity-100 transition p-0.5">
+                  <svg v-if="!showPw" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                  <svg v-else viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                </button>
+              </span>
+            </label>
+            <label class="mono text-[11px] font-bold">NEUES PASSWORT<input v-model="pw.next" :type="showPw ? 'text' : 'password'" autocomplete="new-password" class="mt-1 w-full border-2 border-black rounded-lg px-2 py-1.5 mono text-xs font-normal" /></label>
+            <label class="mono text-[11px] font-bold">WIEDERHOLEN<input v-model="pw.repeat" :type="showPw ? 'text' : 'password'" autocomplete="new-password" class="mt-1 w-full border-2 border-black rounded-lg px-2 py-1.5 mono text-xs font-normal" /></label>
+            <div class="min-h-[2.5rem]"><div v-if="pwMsg" class="mono text-xs font-bold px-3 py-2 rounded-xl" :class="pwOk ? 'bg-green-600 text-white' : 'bg-[#FF3B2F] text-white'">{{ pwMsg }}</div></div>
             <button type="submit" :disabled="busy" class="mono text-xs font-black bg-black text-white px-5 py-2 rounded-full hover:bg-[#FF3B2F] transition w-fit disabled:opacity-50">{{ busy ? 'Moment …' : 'Passwort speichern' }}</button>
           </form>
         </section>
@@ -163,6 +180,8 @@ const fresh = ref({ dateIso: '', place: '', city: '', note: '', link: '' })
 const pw = ref({ current: '', next: '', repeat: '' })
 const pwMsg = ref('')
 const pwOk = ref(false)
+const showLogin = ref(false)
+const showPw = ref(false)
 const status = ref(null)
 const statusMsg = ref('')
 const reelUrl = ref('')
@@ -186,7 +205,6 @@ function timeAgo(iso) {
   if (s < 86400) return `vor ${Math.floor(s / 3600)} Std.`
   return new Date(iso).toLocaleString('de-AT')
 }
-const statusAgo = computed(() => timeAgo((status.value && (status.value.checkedAt || status.value.syncedAt)) || null))
 const customReels = computed(() => (status.value && status.value.media ? status.value.media.filter((m) => m.addedAt) : []))
 const customCount = computed(() => customReels.value.length)
 const sortedGigs = computed(() => {

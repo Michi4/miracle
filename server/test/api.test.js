@@ -124,6 +124,9 @@ test('parsePostMeta reads post og tags', async () => {
   assert.equal(r.date, '31.07.2025')
   assert.equal(parse('<html></html>', 'https://www.instagram.com/p/ABCDEF12345/'), null)
   assert.equal(parse(html, 'https://www.instagram.com/miracleechoes/'), null)
+  // reversed attribute order also parses
+  const rev = '<meta content="99 Followers, 7 Following, 3 Posts - x" property="og:description" />'
+  assert.deepEqual((await import('../live.js')).parseCounts(rev), { followers: 99, following: 7, posts: 3 })
 })
 
 test('custom reels store roundtrip', async () => {

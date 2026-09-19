@@ -17,7 +17,13 @@ const SYNC_EVERY_MS = 45 * 60 * 1000
 
 /** "301 Followers, 95 Following, 28 Posts" -> {followers:301, following:95, posts:28} */
 export function parseCounts(html) {
-  const m = String(html).match(/<meta property="og:description" content="([^"]+)/)
+  const t = String(html)
+  let m = t.match(/<meta property="og:description" content="([^"]+)/)
+  if (!m) {
+    // attribute order variant: <meta content="..." property="og:description" ...>
+    const tag = t.match(/<meta[^>]*property="og:description"[^>]*>/)
+    if (tag) m = tag[0].match(/content="([^"]+)/)
+  }
   if (!m) return null
   const nums = m[1].match(/([\d.,\s]+)\s*Followers?,?\s*([\d.,\s]+)\s*Following,?\s*([\d.,\s]+)\s*Posts?/)
   if (!nums) return null
@@ -25,23 +31,41 @@ export function parseCounts(html) {
   return { followers: n(nums[1]), following: n(nums[2]), posts: n(nums[3]) }
 }
 
-async function fetchProfile(user) {
+// Instagram blocks datacenter IPs intermittently (data-less shell page).
+// Try direct first, then public fetch proxies — first parseable result wins.
+const SOURCES = [
+  (user) => `https://www.instagram.com/${user}/`,
+  (user) => `https://api.allorigins.win/raw?url=${encodeURIComponent(`https://www.instagram.com/${user}/`)}`,
+  (user) => `https://corsproxy.io/?url=${encodeURIComponent(`https://www.instagram.com/${user}/`)}`,
+]
+
+async function fetchText(url) {
   const ctl = new AbortController()
   const t = setTimeout(() => ctl.abort(), 15000)
   try {
-    const r = await fetch(`https://www.instagram.com/${user}/`, {
+    const r = await fetch(url, {
       headers: { 'User-Agent': UA, Accept: 'text/html' },
       signal: ctl.signal,
     })
     if (!r.ok) return null
     const text = await r.text()
-    if (text.length > 3_000_000) return null
-    return parseCounts(text)
+    if (!text || text.length > 3_000_000) return null
+    return text
   } catch {
     return null
   } finally {
     clearTimeout(t)
   }
+}
+
+async function fetchProfile(user) {
+  for (const build of SOURCES) {
+    const text = await fetchText(build(user))
+    if (!text) continue
+    const c = parseCounts(text)
+    if (c && (c.followers > 0 || c.posts > 0)) return c
+  }
+  return null
 }
 
 async function fetchGraph() {
@@ -82,9 +106,11 @@ function fmtDate(iso) {
   return `${p(d.getDate())}.${p(d.getMonth() + 1)}.${d.getFullYear()}`
 }
 
+const CACHE_KEY = 'live_cache_v2'
+
 export function readCache() {
   try {
-    const raw = kvGet('live_cache')
+    const raw = kvGet(CACHE_KEY)
     if (raw) return JSON.parse(raw)
   } catch { /* ignore */ }
   return null
@@ -120,7 +146,7 @@ export async function syncLive() {
     syncedAt: ok > 0 ? now : (prev?.syncedAt || null),
     checkedAt: now,
   }
-  kvSet('live_cache', JSON.stringify(cache))
+  kvSet(CACHE_KEY, JSON.stringify(cache))
   return cache
 }
 

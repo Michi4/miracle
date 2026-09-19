@@ -266,7 +266,7 @@ async function reloadLive(){
   try { applyLive(await fetchLive(true)) } catch { /* fallback stays */ }
 }
 // live Instagram data (counts + reels) with baked-in fallbacks
-const live = ref({ band:{posts:28,followers:302,following:95}, hannah:{posts:12,followers:307,following:0}, sophie:{posts:19,followers:741,following:0}, media:[], syncedAt:null, graph:false })
+const live = ref({ band:{posts:28,followers:300,following:95}, hannah:{posts:14,followers:306,following:788}, sophie:{posts:19,followers:757,following:626}, media:[], syncedAt:null, graph:false })
 function normUrl(u){ return String(u || '').split('?')[0].replace(/\/$/, '').toLowerCase() }
 // live/new reels first, then the built-in selection (deduplicated), max 12 cards
 const displayPosts = computed(()=>{

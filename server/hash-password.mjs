@@ -32,7 +32,7 @@ function askHidden(q) {
 }
 
 const a = await askHidden('Neues Admin-Passwort: ')
-if (a.length < 10) { console.error('Fehler: mindestens 10 Zeichen.'); process.exit(1) }
+if (!a.length) { console.error('Fehler: Passwort darf nicht leer sein.'); process.exit(1) }
 const b = await askHidden('Wiederholen: ')
 if (a !== b) { console.error('Fehler: stimmt nicht überein.'); process.exit(1) }
 const hash = bcrypt.hashSync(a, 12)

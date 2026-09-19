@@ -14,7 +14,7 @@
 
 ## Passwort ändern
 
-- Im Admin unten bei „Passwort ändern": aktuelles + neues (mind. 10 Zeichen) + wiederholen.
+- Im Admin unten bei „Passwort ändern": aktuelles + neues + wiederholen (Augen-Symbol zeigt es bei Bedarf an).
 - Das Start-Passwort bitte **gleich beim ersten Login ändern**.
 
 ## Instagram Live-Status

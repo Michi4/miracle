@@ -30,5 +30,5 @@ export const loginSchema = z.object({
 
 export const passwordSchema = z.object({
   current: z.string().min(1).max(200),
-  next: z.string().min(10, 'Neues Passwort: mindestens 10 Zeichen').max(200),
+  next: z.string().min(1, 'Bitte neues Passwort eingeben.').max(200),
 })

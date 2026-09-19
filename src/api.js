@@ -52,9 +52,9 @@ export async function fetchLive(fresh = false) {
     return (Number(a.posts) || 0) > 0 || (Number(a.followers) || 0) > 0
   }) || (Array.isArray(j.media) && j.media.length > 0)
   return {
-    band: acc('band', { posts: 28, followers: 302, following: 95 }),
-    hannah: acc('hannah', { posts: 12, followers: 307, following: 0 }),
-    sophie: acc('sophie', { posts: 19, followers: 741, following: 0 }),
+    band: acc('band', { posts: 28, followers: 300, following: 95 }),
+    hannah: acc('hannah', { posts: 14, followers: 306, following: 788 }),
+    sophie: acc('sophie', { posts: 19, followers: 757, following: 626 }),
     media: Array.isArray(j.media) ? j.media.map((m) => ({
       id: m.id || m.url,
       display_url: thumb(m.image),
