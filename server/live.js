@@ -13,7 +13,6 @@ export const ACCOUNTS = [
 ]
 
 const UA = 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1'
-const SYNC_EVERY_MS = 45 * 60 * 1000
 
 /** "301 Followers, 95 Following, 28 Posts" -> {followers:301, following:95, posts:28} */
 export function parseCounts(html) {
@@ -108,6 +107,64 @@ function fmtDate(iso) {
 
 const CACHE_KEY = 'live_cache_v2'
 
+// ---- manual overrides (admin sets numbers by hand when sync is blocked) ----
+export function getOverrides() {
+  try {
+    const raw = kvGet('stat_overrides')
+    if (!raw || raw === 'null') return null
+    const o = JSON.parse(raw)
+    if (!o || typeof o !== 'object') return null
+    for (const k of ['band', 'hannah', 'sophie']) {
+      const a = o[k]
+      if (!a || !Number.isInteger(a.posts) || !Number.isInteger(a.followers)) return null
+      a.following = Number.isInteger(a.following) ? a.following : 0
+    }
+    return o
+  } catch {
+    return null
+  }
+}
+export function setOverrides(o) {
+  kvSet('stat_overrides', JSON.stringify(o))
+}
+export function clearOverrides() {
+  kvSet('stat_overrides', 'null')
+}
+
+/** Merge scrape cache with manual overrides (override wins). Adds manual flags. */
+export function mergeAccounts(cached) {
+  const ov = getOverrides()
+  const out = {}
+  for (const k of ['band', 'hannah', 'sophie']) {
+    if (ov && ov[k]) {
+      out[k] = { posts: ov[k].posts, followers: ov[k].followers, following: ov[k].following, manual: true }
+    } else {
+      const b = (cached && cached[k]) || {}
+      out[k] = {
+        posts: Number(b.posts) || 0,
+        followers: Number(b.followers) || 0,
+        following: Number(b.following) || 0,
+        manual: false,
+      }
+    }
+  }
+  return out
+}
+
+// ---- hidden baked posts ----
+export function getHidden() {
+  try {
+    const raw = kvGet('hidden_urls')
+    const arr = raw ? JSON.parse(raw) : []
+    return Array.isArray(arr) ? arr.filter((u) => typeof u === 'string') : []
+  } catch {
+    return []
+  }
+}
+export function setHidden(arr) {
+  kvSet('hidden_urls', JSON.stringify(arr))
+}
+
 export function readCache() {
   try {
     const raw = kvGet(CACHE_KEY)
@@ -147,10 +204,33 @@ export async function syncLive() {
     checkedAt: now,
   }
   kvSet(CACHE_KEY, JSON.stringify(cache))
-  return cache
+  // ok = ausschließlich FRISCHE Daten (Scrape-Treffer oder Graph), nie alter Cache
+  const graphOk = !!(graph && (graph.followers > 0 || graph.posts > 0 || (graph.media || []).length > 0))
+  return { ...cache, ok: ok > 0 || graphOk }
 }
 
+// Smart backoff, kein stumpfes Retry: 45 Min -> 90 Min -> 3 Std -> 6 Std (Cap).
+// Jeder Erfolg setzt zurück. Zähler überlebt Restarts (kv).
+const BASE_MS = 45 * 60 * 1000
+const MAX_MS = 6 * 60 * 60 * 1000
+
 export function startSyncLoop() {
-  setTimeout(() => { syncLive().catch(() => {}) }, 5000)
-  setInterval(() => { syncLive().catch(() => {}) }, SYNC_EVERY_MS)
+  let fails = Number(kvGet('sync_fails') || 0) || 0
+  const tick = async () => {
+    let delay = BASE_MS
+    try {
+      const r = await syncLive()
+      if (r && r.ok) {
+        if (fails > 0) { fails = 0; kvSet('sync_fails', '0') }
+      } else {
+        throw new Error('no data')
+      }
+    } catch {
+      fails += 1
+      kvSet('sync_fails', String(fails))
+      delay = Math.min(BASE_MS * 2 ** Math.min(fails, 3), MAX_MS)
+    }
+    setTimeout(tick, delay)
+  }
+  setTimeout(tick, 5000)
 }

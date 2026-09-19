@@ -3,7 +3,7 @@ import { z } from 'zod'
 
 const DATE_RE = /^(\d{2})\.(\d{2})\.(\d{4})$/
 
-function realDate(s) {
+export function realDate(s) {
   const m = DATE_RE.exec(s || '')
   if (!m) return false
   const d = Number(m[1]); const mo = Number(m[2]); const y = Number(m[3])
@@ -31,4 +31,25 @@ export const loginSchema = z.object({
 export const passwordSchema = z.object({
   current: z.string().min(1).max(200),
   next: z.string().min(1, 'Bitte neues Passwort eingeben.').max(200),
+})
+
+const statAccount = z.object({
+  posts: z.number().int().min(0).max(999999999),
+  followers: z.number().int().min(0).max(999999999),
+  following: z.number().int().min(0).max(999999999),
+})
+export const statsSchema = z.object({
+  band: statAccount,
+  hannah: statAccount,
+  sophie: statAccount,
+})
+
+export const reelEditSchema = z.object({
+  caption: z.string().trim().min(1, 'Text fehlt.').max(600).optional(),
+  date: z.string().regex(DATE_RE, 'Datum muss DD.MM.YYYY sein').refine(realDate, 'Kein gültiges Datum').optional(),
+  type: z.enum(['REEL', 'PHOTO']).optional(),
+}).refine((o) => Object.keys(o).length > 0, 'Nichts zu ändern.')
+
+export const hiddenSchema = z.object({
+  hidden: z.array(z.string().trim().min(1).max(500).refine((s) => /^https:\/\/[^\s]+$/i.test(s), 'Nur https-Links.')).max(50).default([]),
 })

@@ -6,10 +6,10 @@ import express from 'express'
 import helmet from 'helmet'
 import rateLimit from 'express-rate-limit'
 import { getUserById, listGigs, insertGig, updateGig, deleteGig, seedGigsIfEmpty, countUsers, createUser, setUserPass, purgeExpiredSessions } from './store.js'
-import { gigSchema, loginSchema, passwordSchema } from './validate.js'
+import { gigSchema, loginSchema, passwordSchema, statsSchema, reelEditSchema, hiddenSchema } from './validate.js'
 import { verifyLogin, openSession, readSession, closeSession, checkCsrf, hashPassword, checkPassword } from './auth.js'
-import { readCache, syncLive, startSyncLoop } from './live.js'
-import { extractShortcode, fetchPostMeta, listCustomReels, findCustomReel, addCustomReel, removeCustomReel } from './reels.js'
+import { readCache, syncLive, startSyncLoop, mergeAccounts, getOverrides, setOverrides, clearOverrides, getHidden, setHidden } from './live.js'
+import { extractShortcode, fetchPostMeta, listCustomReels, findCustomReel, addCustomReel, removeCustomReel, editCustomReel } from './reels.js'
 
 // Seed gigs: repo layout (../src/gigs.js) in dev, ./seed-gigs.js in the container.
 let allGigs = [
@@ -100,8 +100,10 @@ export function createApp() {
     res.set('Cache-Control', 'public, max-age=300')
     const c = readCache()
     const custom = listCustomReels()
-    if (c) return res.json({ ...c, media: [...custom, ...(c.media || [])], syncedAt: c.syncedAt || custom[0]?.addedAt || null })
-    res.json({ accounts: { band: null, hannah: null, sophie: null }, media: custom, graph: false, syncedAt: custom[0]?.addedAt || null, checkedAt: null })
+    const media = [...custom, ...((c && c.media) || [])]
+    const syncedAt = (c && c.syncedAt) || custom[0]?.addedAt || null
+    if (c) return res.json({ ...c, accounts: mergeAccounts(c.accounts), media, hidden: getHidden(), syncedAt })
+    res.json({ accounts: mergeAccounts(null), media, hidden: getHidden(), graph: false, syncedAt, checkedAt: null })
   })
 
   // ---- auth ----
@@ -175,6 +177,35 @@ export function createApp() {
     if (!/^[A-Za-z0-9_-]{5,30}$/.test(id)) return res.status(400).json({ error: 'Ungültige ID.' })
     if (!removeCustomReel(id)) return res.status(404).json({ error: 'Nicht gefunden.' })
     res.json({ ok: true })
+  })
+
+  app.put('/api/admin/reels/:id', needAuth, needCsrf, writeLimiter, (req, res) => {
+    const id = String(req.params.id || '')
+    if (!/^[A-Za-z0-9_-]{5,30}$/.test(id)) return res.status(400).json({ error: 'Ungültige ID.' })
+    const p = reelEditSchema.safeParse(req.body)
+    if (!p.success) return res.status(400).json({ error: p.error.issues[0]?.message || 'Ungültig.' })
+    const reel = editCustomReel(id, p.data)
+    if (!reel) return res.status(404).json({ error: 'Nicht gefunden (nur per Link hinzugefügte Reels sind editierbar).' })
+    res.json({ reel })
+  })
+
+  app.put('/api/admin/stats', needAuth, needCsrf, writeLimiter, (req, res) => {
+    const p = statsSchema.safeParse(req.body)
+    if (!p.success) return res.status(400).json({ error: p.error.issues[0]?.message || 'Ungültig.' })
+    setOverrides(p.data)
+    res.json({ ok: true, overrides: getOverrides() })
+  })
+
+  app.delete('/api/admin/stats', needAuth, needCsrf, writeLimiter, (_req, res) => {
+    clearOverrides()
+    res.json({ ok: true })
+  })
+
+  app.put('/api/admin/hidden', needAuth, needCsrf, writeLimiter, (req, res) => {
+    const p = hiddenSchema.safeParse(req.body)
+    if (!p.success) return res.status(400).json({ error: p.error.issues[0]?.message || 'Ungültig.' })
+    setHidden([...new Set(p.data.hidden)])
+    res.json({ ok: true, hidden: getHidden() })
   })
 
   app.post('/api/admin/sync', needAuth, needCsrf, writeLimiter, async (_req, res) => {

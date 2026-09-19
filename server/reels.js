@@ -120,3 +120,13 @@ export function removeCustomReel(id) {
   saveCustomReels(next)
   return true
 }
+export function editCustomReel(id, patch) {
+  const arr = listCustomReels()
+  const row = arr.find((r) => r.id === id)
+  if (!row) return null
+  if (patch.caption !== undefined) row.caption = patch.caption
+  if (patch.date !== undefined) row.date = patch.date
+  if (patch.type !== undefined) row.type = patch.type
+  saveCustomReels(arr)
+  return row
+}

@@ -44,11 +44,30 @@
           <div class="mono text-xs mt-2 min-h-[1rem] opacity-80">{{ statusMsg }}</div>
           <div v-if="status" class="mono text-xs mt-3 flex flex-col gap-1.5">
             <div>Letzter erfolgreicher Sync: <b>{{ status.syncedAt ? timeAgo(status.syncedAt) : 'noch nie' }}</b> • Modus: <b>{{ status.graph ? 'offizielle API' : 'öffentlich' }}</b></div>
-            <div v-if="!status.syncedAt" class="bg-[#FFD23F] text-black font-bold px-3 py-2 rounded-xl">Noch keine Live-Daten — Instagram blockiert unseren Server gerade (Rate-Limit). Wird alle 45 Min. erneut versucht. Zahlen unten sind gespeicherte Werte.</div>
+            <div v-if="!status.syncedAt" class="bg-[#FFD23F] text-black font-bold px-3 py-2 rounded-xl">Noch keine Live-Daten — Instagram blockiert unseren Server gerade (Rate-Limit). Wird automatisch erneut versucht (mit wachsender Pause bei Block). Zahlen unten sind gespeicherte Werte.</div>
             <div>@miracleechoes: <b>{{ status.band.followers }} Follower • {{ status.band.posts }} Posts</b><span v-if="!status.syncedAt" class="opacity-60"> (gespeichert)</span></div>
             <div class="opacity-70">hannah_rumetshofer: {{ status.hannah.followers }} Follower • {{ status.hannah.posts }} Posts<span v-if="!status.syncedAt"> (gespeichert)</span></div>
             <div class="opacity-70">sophie.fsdr: {{ status.sophie.followers }} Follower • {{ status.sophie.posts }} Posts<span v-if="!status.syncedAt"> (gespeichert)</span></div>
             <div class="opacity-70">Reels auf der Seite: {{ status.media.length }} ({{ customCount }} per Link hinzugefügt)</div>
+          </div>
+        </section>
+
+        <!-- STATS -->
+        <section class="bg-white border-[2.5px] border-black rounded-[24px] p-6">
+          <div class="font-black text-lg">Zahlen manuell pflegen</div>
+          <p class="mono text-xs opacity-60 mt-1">Backup, falls der Sync blockiert ist. Manuelle Werte gewinnen immer und sofort.</p>
+          <div class="mt-2 min-h-[2.5rem]"><div v-if="statsMsg" class="mono text-xs font-bold px-3 py-2 rounded-xl" :class="statsOk ? 'bg-green-600 text-white' : 'bg-[#FF3B2F] text-white'">{{ statsMsg }}</div></div>
+          <div v-for="acc in [['band', '@miracleechoes'], ['hannah', 'hannah_rumetshofer'], ['sophie', 'sophie.fsdr']]" :key="acc[0]" class="mt-2 border-2 border-black/10 rounded-2xl p-3">
+            <div class="mono text-[11px] font-bold flex items-center gap-2">{{ acc[1] }}<span v-if="isManual(acc[0])" class="bg-[#FFD23F] border border-black px-2 py-0.5 rounded-full">MANUELL</span></div>
+            <div class="grid grid-cols-3 gap-2 mt-1.5">
+              <label class="mono text-[10px] font-bold">POSTS<input v-model.number="statsForm[acc[0]].posts" type="number" min="0" step="1" class="mt-0.5 w-full border-2 border-black rounded-lg px-2 py-1.5 mono text-xs font-normal" /></label>
+              <label class="mono text-[10px] font-bold">FOLLOWER<input v-model.number="statsForm[acc[0]].followers" type="number" min="0" step="1" class="mt-0.5 w-full border-2 border-black rounded-lg px-2 py-1.5 mono text-xs font-normal" /></label>
+              <label class="mono text-[10px] font-bold">FOLGT<input v-model.number="statsForm[acc[0]].following" type="number" min="0" step="1" class="mt-0.5 w-full border-2 border-black rounded-lg px-2 py-1.5 mono text-xs font-normal" /></label>
+            </div>
+          </div>
+          <div class="flex flex-wrap gap-3 items-center mt-3">
+            <button @click="saveStats" :disabled="busy" class="mono text-xs font-black bg-black text-white px-5 py-2 rounded-full hover:bg-[#FF3B2F] transition disabled:opacity-50">{{ busy ? 'Moment …' : 'Zahlen speichern' }}</button>
+            <button @click="resetStats" :disabled="busy" class="mono text-xs underline disabled:opacity-50">Zurücksetzen (Sync übernimmt)</button>
           </div>
         </section>
 
@@ -61,19 +80,46 @@
             <button type="submit" :disabled="busy || !reelUrl.trim()" class="mono text-xs font-black bg-black text-white px-5 py-2 rounded-full hover:bg-[#FF3B2F] transition disabled:opacity-50 shrink-0">{{ busy ? '…' : '+ Hinzufügen' }}</button>
           </form>
           <div class="mt-3 min-h-[2.75rem]"><div v-if="reelMsg" class="mono text-xs font-bold px-3 py-2 rounded-xl" :class="reelOk ? 'bg-green-600 text-white' : 'bg-[#FF3B2F] text-white'">{{ reelMsg }}</div></div>
-          <div v-if="customReels.length" class="mt-3 grid grid-cols-2 sm:grid-cols-3 gap-2">
-            <div v-for="r in customReels" :key="r.id" class="relative rounded-xl overflow-hidden border-2 border-black/10 bg-black">
-              <img :src="r.display_url" :alt="r.caption.slice(0, 60)" class="w-full aspect-[4/5] object-cover" loading="lazy" />
-              <div class="absolute top-1.5 left-1.5 mono text-[9px] font-bold bg-white text-black px-2 py-0.5 rounded-full">{{ r.type }}</div>
-              <button v-if="confirmReelId !== r.id" @click="confirmReelId = r.id" class="absolute top-1 right-1 mono text-[10px] font-bold bg-[#FF3B2F] text-white w-6 h-6 rounded-full">✕</button>
-              <div v-else class="absolute inset-x-1 top-1 bg-white rounded-lg p-1.5 flex items-center justify-between gap-1">
-                <span class="mono text-[9px] font-bold">Weg?</span>
-                <span class="flex gap-1">
-                  <button @click="removeReel(r.id)" :disabled="rowBusy === r.id" class="mono text-[9px] font-black bg-[#FF3B2F] text-white px-2 py-0.5 rounded-full disabled:opacity-50">Ja</button>
-                  <button @click="confirmReelId = null" class="mono text-[9px] underline">Nein</button>
-                </span>
+          <div v-if="customReels.length" class="mt-3 flex flex-col gap-2">
+            <div v-for="r in customReels" :key="r.id" class="border-2 border-black/10 rounded-2xl p-2 flex gap-3 items-start">
+              <img :src="r.display_url" :alt="r.caption.slice(0, 60)" class="w-16 aspect-[4/5] object-cover rounded-lg bg-black shrink-0" loading="lazy" />
+              <div class="min-w-0 flex-1">
+                <div v-if="editReelId !== r.id">
+                  <div class="mono text-[9px] font-bold opacity-60">{{ r.type }} • {{ r.date }}</div>
+                  <div class="text-sm leading-snug break-words">{{ r.caption }}</div>
+                  <div class="flex flex-wrap gap-3 mt-1.5">
+                    <button @click="startReelEdit(r)" class="mono text-[11px] font-bold underline">Bearbeiten</button>
+                    <button v-if="confirmReelId !== r.id" @click="confirmReelId = r.id; reelMsg = ''" class="mono text-[11px] font-bold text-[#FF3B2F] underline">Entfernen</button>
+                    <span v-else class="mono text-[11px] flex items-center gap-2">Wirklich?
+                      <button @click="removeReel(r.id)" :disabled="rowBusy === r.id" class="font-black text-[#FF3B2F] underline disabled:opacity-50">Ja</button>
+                      <button @click="confirmReelId = null" class="underline">Nein</button>
+                    </span>
+                  </div>
+                </div>
+                <div v-else class="flex flex-col gap-1.5">
+                  <label class="mono text-[10px] font-bold">TEXT<input v-model="reelDraft.caption" maxlength="600" class="mt-0.5 w-full border-2 border-black rounded-lg px-2 py-1 mono text-xs font-normal" /></label>
+                  <div class="grid grid-cols-2 gap-1.5">
+                    <label class="mono text-[10px] font-bold">DATUM (TT.MM.JJJJ)<input v-model="reelDraft.date" placeholder="06.08.2026" class="mt-0.5 w-full border-2 border-black rounded-lg px-2 py-1 mono text-xs font-normal" /></label>
+                    <label class="mono text-[10px] font-bold">TYP<select v-model="reelDraft.type" class="mt-0.5 w-full border-2 border-black rounded-lg px-2 py-1 mono text-xs font-normal"><option value="REEL">REEL</option><option value="PHOTO">PHOTO</option></select></label>
+                  </div>
+                  <div class="flex gap-3 items-center">
+                    <button @click="saveReelEdit(r.id)" :disabled="rowBusy === r.id" class="mono text-[11px] font-black bg-[#FFD23F] border-2 border-black px-3 py-1 rounded-full disabled:opacity-50">{{ rowBusy === r.id ? '…' : 'Speichern' }}</button>
+                    <button @click="editReelId = null" class="mono text-[11px] underline">Abbrechen</button>
+                  </div>
+                </div>
               </div>
-              <div class="absolute bottom-0 inset-x-0 mono text-[9px] text-white bg-black/70 px-2 py-1 truncate">{{ r.date }}</div>
+            </div>
+          </div>
+
+          <div class="mt-4 border-t-2 border-dashed border-black/15 pt-4">
+            <div class="font-black text-sm">Feste Auswahl</div>
+            <p class="mono text-[11px] opacity-60 mt-0.5">Fixe Posts bei Bedarf ausblenden — ohne sie zu löschen.</p>
+            <div class="mt-2 flex flex-col gap-1.5">
+              <div v-for="p in bakedPosts" :key="p.url" class="flex gap-2.5 items-center border-2 rounded-xl p-1.5" :class="isHidden(p.url) ? 'border-black/10 opacity-60' : 'border-black/10'">
+                <img :src="p.display_url" :alt="p.caption.slice(0, 40)" class="w-11 aspect-[4/5] object-cover rounded-md bg-black shrink-0" loading="lazy" />
+                <div class="min-w-0 flex-1 mono text-[11px] leading-snug break-words">{{ p.caption.split('#')[0].trim().slice(0, 90) }}<span v-if="isHidden(p.url)" class="font-bold"> (versteckt)</span></div>
+                <button @click="toggleHidden(p.url)" :disabled="busy" class="mono text-[11px] font-bold underline shrink-0 disabled:opacity-50">{{ isHidden(p.url) ? 'Anzeigen' : 'Verbergen' }}</button>
+              </div>
             </div>
           </div>
         </section>
@@ -159,8 +205,9 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
-import { apiLogin, apiLogout, apiMe, apiChangePassword, apiCreateGig, apiUpdateGig, apiDeleteGig, apiTriggerSync, apiAddReel, apiDeleteReel, fetchGigs, fetchLive } from './api.js'
+import { apiLogin, apiLogout, apiMe, apiChangePassword, apiCreateGig, apiUpdateGig, apiDeleteGig, apiTriggerSync, apiAddReel, apiDeleteReel, apiEditReel, apiSaveStats, apiClearStats, apiSetHidden, fetchGigs, fetchLive } from './api.js'
 import { parseDate, startOfDay } from './gigs.js'
+import { bakedPosts } from './posts.js'
 
 const emit = defineEmits(['close', 'gigs-changed', 'live-changed'])
 
@@ -187,6 +234,11 @@ const statusMsg = ref('')
 const reelUrl = ref('')
 const reelMsg = ref('')
 const reelOk = ref(false)
+const editReelId = ref(null)
+const reelDraft = ref({ caption: '', date: '', type: 'REEL' })
+const statsForm = ref({ band: { posts: 0, followers: 0, following: 0 }, hannah: { posts: 0, followers: 0, following: 0 }, sophie: { posts: 0, followers: 0, following: 0 } })
+const statsMsg = ref('')
+const statsOk = ref(false)
 let statusTimer = null
 
 function isoToDe(iso) {
@@ -207,6 +259,19 @@ function timeAgo(iso) {
 }
 const customReels = computed(() => (status.value && status.value.media ? status.value.media.filter((m) => m.addedAt) : []))
 const customCount = computed(() => customReels.value.length)
+const hiddenSet = computed(() => new Set(status.value && Array.isArray(status.value.hidden) ? status.value.hidden : []))
+function isManual(key) {
+  return !!(status.value && status.value[key] && status.value[key].manual)
+}
+function isHidden(url) {
+  return hiddenSet.value.has(url)
+}
+function populateStats() {
+  for (const k of ['band', 'hannah', 'sophie']) {
+    const a = status.value && status.value[k]
+    if (a) statsForm.value[k] = { posts: a.posts || 0, followers: a.followers || 0, following: a.following || 0 }
+  }
+}
 const sortedGigs = computed(() => {
   const day = startOfDay(new Date())
   const rows = gigs.value.map((g) => {
@@ -257,6 +322,7 @@ async function doLogin() {
     user.value = j.user
     form.value.password = ''
     await Promise.all([loadGigs(), loadStatus()])
+    populateStats()
     startStatusTimer()
   } catch (e) {
     loginError.value = (e && e.message) || 'Login fehlgeschlagen.'
@@ -289,21 +355,25 @@ async function saveEdit(id) {
   try {
     await apiUpdateGig(id, gigPayload(draft.value))
     editingId.value = null
+    // optimistic: patch row instantly, reconcile with server afterwards
+    gigs.value = gigs.value.map((g) => g.id === id ? { id, ...gigPayload(draft.value) } : g)
     await loadGigs(true)
     emit('gigs-changed')
     flashOk('Gespeichert — sofort live.')
-  } catch (e) { await noteAuth(e) }
+  } catch (e) { await noteAuth(e); try { await loadGigs(true) } catch {} }
   finally { rowBusy.value = null }
 }
 async function addGig() {
   busy.value = true
   try {
-    await apiCreateGig(gigPayload(fresh.value))
+    const c = await apiCreateGig(gigPayload(fresh.value))
     fresh.value = { dateIso: '', place: '', city: '', note: '', link: '' }
+    // optimistic: show instantly, reconcile with server afterwards
+    if (c && c.gig) gigs.value = [...gigs.value, c.gig]
     await loadGigs(true)
     emit('gigs-changed')
     flashOk('Gig hinzugefügt — sofort live.')
-  } catch (e) { await noteAuth(e) }
+  } catch (e) { await noteAuth(e); try { await loadGigs(true) } catch {} }
   finally { busy.value = false }
 }
 async function removeGig(id) {
@@ -311,10 +381,12 @@ async function removeGig(id) {
   try {
     await apiDeleteGig(id)
     confirmGigId.value = null
+    // optimistic: row vanishes instantly, reconcile with server afterwards
+    gigs.value = gigs.value.filter((g) => g.id !== id)
     await loadGigs(true)
     emit('gigs-changed')
     flashOk('Gelöscht.')
-  } catch (e) { await noteAuth(e) }
+  } catch (e) { await noteAuth(e); try { await loadGigs(true) } catch {} }
   finally { rowBusy.value = null }
 }
 async function addReel() {
@@ -348,6 +420,77 @@ async function removeReel(id) {
     if (!(await noteAuth(e, true))) { reelMsg.value = (e && e.message) || 'Fehler.' }
   } finally {
     rowBusy.value = null
+  }
+}
+function startReelEdit(r) {
+  editReelId.value = r.id
+  confirmReelId.value = null
+  reelDraft.value = { caption: r.caption || '', date: r.date || '', type: r.type === 'PHOTO' ? 'PHOTO' : 'REEL' }
+  reelMsg.value = ''
+}
+async function saveReelEdit(id) {
+  rowBusy.value = id
+  try {
+    await apiEditReel(id, { caption: reelDraft.value.caption.trim(), date: reelDraft.value.date.trim(), type: reelDraft.value.type })
+    editReelId.value = null
+    await loadStatus(true)
+    emit('live-changed')
+    reelOk.value = true
+    reelMsg.value = 'Reel aktualisiert.'
+  } catch (e) {
+    reelOk.value = false
+    if (!(await noteAuth(e, true))) { reelMsg.value = (e && e.message) || 'Fehler.' }
+  } finally {
+    rowBusy.value = null
+  }
+}
+async function toggleHidden(url) {
+  busy.value = true
+  try {
+    const next = isHidden(url) ? [...hiddenSet.value].filter((u) => u !== url) : [...hiddenSet.value, url]
+    await apiSetHidden(next)
+    await loadStatus(true)
+    emit('live-changed')
+  } catch (e) {
+    if (!(await noteAuth(e, true))) { reelMsg.value = (e && e.message) || 'Fehler.' }
+  } finally {
+    busy.value = false
+  }
+}
+async function saveStats() {
+  busy.value = true
+  statsMsg.value = ''
+  statsOk.value = false
+  try {
+    const clean = {}
+    for (const k of ['band', 'hannah', 'sophie']) {
+      const f = statsForm.value[k] || {}
+      clean[k] = { posts: Math.max(0, Math.floor(Number(f.posts) || 0)), followers: Math.max(0, Math.floor(Number(f.followers) || 0)), following: Math.max(0, Math.floor(Number(f.following) || 0)) }
+    }
+    await apiSaveStats(clean)
+    await loadStatus(true)
+    emit('live-changed')
+    statsOk.value = true
+    statsMsg.value = 'Zahlen gespeichert — sofort live.'
+  } catch (e) {
+    if (!(await noteAuth(e, true))) { statsMsg.value = (e && e.message) || 'Fehler.' }
+  } finally {
+    busy.value = false
+  }
+}
+async function resetStats() {
+  busy.value = true
+  try {
+    await apiClearStats()
+    await loadStatus(true)
+    populateStats()
+    emit('live-changed')
+    statsOk.value = true
+    statsMsg.value = 'Zurückgesetzt — Sync übernimmt wieder.'
+  } catch (e) {
+    if (!(await noteAuth(e, true))) { statsMsg.value = (e && e.message) || 'Fehler.' }
+  } finally {
+    busy.value = false
   }
 }
 async function doPassword() {
@@ -388,6 +531,7 @@ onMounted(async () => {
     const j = await apiMe()
     user.value = j.user
     await Promise.all([loadGigs(), loadStatus()])
+    populateStats()
     startStatusTimer()
   } catch { /* not logged in */ }
 })

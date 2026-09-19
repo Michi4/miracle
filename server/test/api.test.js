@@ -148,3 +148,49 @@ test('reels endpoints: auth + validation', async () => {
   assert.equal((await api('POST', '/api/admin/reels', { url: 'https://evil.com/p/ABCDEF12345/' }, csrf)).status, 400)
   assert.equal((await api('DELETE', '/api/admin/reels/NOPE-NOT-HERE-1', null, csrf)).status, 404)
 })
+
+test('stats override: validation, auth, merge priority', async () => {
+  const bad = { band: { posts: 1, followers: 2, following: 3 }, hannah: { posts: 1, followers: 2, following: 3 } }
+  jar = ''
+  assert.equal((await api('PUT', '/api/admin/stats', bad)).status, 401)
+  const login = await api('POST', '/api/auth/login', { username: 'sophie', password: 'neues-geheimes-pw' })
+  assert.equal(login.status, 200)
+  const csrf = login.json.csrf
+  assert.equal((await api('PUT', '/api/admin/stats', bad, csrf)).status, 400)
+  assert.equal((await api('PUT', '/api/admin/stats', { band: { posts: -1, followers: 0, following: 0 }, hannah: { posts: 0, followers: 0, following: 0 }, sophie: { posts: 0, followers: 0, following: 0 } }, csrf)).status, 400)
+  const good = { band: { posts: 28, followers: 300, following: 95 }, hannah: { posts: 14, followers: 306, following: 788 }, sophie: { posts: 19, followers: 757, following: 626 } }
+  assert.equal((await api('PUT', '/api/admin/stats', good, csrf)).status, 200)
+  const live = await api('GET', '/api/live')
+  assert.equal(live.json.accounts.band.followers, 300)
+  assert.equal(live.json.accounts.hannah.posts, 14)
+  assert.equal(live.json.accounts.sophie.manual, true)
+  assert.equal((await api('DELETE', '/api/admin/stats', null, csrf)).status, 200)
+  const live2 = await api('GET', '/api/live')
+  assert.equal(live2.json.accounts.sophie.manual, false)
+})
+
+test('reel edit + hidden: validation, auth, roundtrip', async () => {
+  jar = ''
+  await api('POST', '/api/auth/login', { username: 'sophie', password: 'neues-geheimes-pw' })
+  jar = ''
+  assert.equal((await api('PUT', '/api/admin/reels/ABCDEF12345', { caption: 'x' })).status, 401)
+  assert.equal((await api('PUT', '/api/admin/hidden', { hidden: [] })).status, 401)
+  const login = await api('POST', '/api/auth/login', { username: 'sophie', password: 'neues-geheimes-pw' })
+  const csrf = login.json.csrf
+  assert.equal((await api('PUT', '/api/admin/reels/!!!', { caption: 'x' }, csrf)).status, 400)
+  assert.equal((await api('PUT', '/api/admin/reels/ZZZZZ99999', { caption: 'x' }, csrf)).status, 404)
+  assert.equal((await api('PUT', '/api/admin/hidden', { hidden: ['nope'] }, csrf)).status, 400)
+  const { addCustomReel: add } = await import('../reels.js')
+  add({ id: 'EDITME12345', image: 'https://x.cdninstagram.com/a.jpg', caption: 'Alt', url: 'https://www.instagram.com/p/EDITME12345/', type: 'PHOTO', date: '01.01.2027', addedAt: new Date().toISOString() })
+  assert.equal((await api('PUT', '/api/admin/reels/EDITME12345', { date: 'nix' }, csrf)).status, 400)
+  const u = await api('PUT', '/api/admin/reels/EDITME12345', { caption: 'Neu!', type: 'REEL' }, csrf)
+  assert.equal(u.status, 200)
+  assert.equal(u.json.reel.caption, 'Neu!')
+  const h = await api('PUT', '/api/admin/hidden', { hidden: ['https://www.instagram.com/miracleechoes/reel/DbtYTr4umA3/'] }, csrf)
+  assert.equal(h.status, 200)
+  const live = await api('GET', '/api/live')
+  assert.ok(live.json.hidden.includes('https://www.instagram.com/miracleechoes/reel/DbtYTr4umA3/'))
+  assert.equal((await api('PUT', '/api/admin/hidden', { hidden: [] }, csrf)).status, 200)
+  const { removeCustomReel: del } = await import('../reels.js')
+  assert.equal(del('EDITME12345'), true)
+})

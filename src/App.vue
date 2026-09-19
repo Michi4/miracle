@@ -266,14 +266,16 @@ async function reloadLive(){
   try { applyLive(await fetchLive(true)) } catch { /* fallback stays */ }
 }
 // live Instagram data (counts + reels) with baked-in fallbacks
-const live = ref({ band:{posts:28,followers:300,following:95}, hannah:{posts:14,followers:306,following:788}, sophie:{posts:19,followers:757,following:626}, media:[], syncedAt:null, graph:false })
+const live = ref({ band:{posts:28,followers:300,following:95}, hannah:{posts:14,followers:306,following:788}, sophie:{posts:19,followers:757,following:626}, media:[], hidden:[], syncedAt:null, graph:false })
 function normUrl(u){ return String(u || '').split('?')[0].replace(/\/$/, '').toLowerCase() }
-// live/new reels first, then the built-in selection (deduplicated), max 12 cards
+// live/new reels first, then the built-in selection (deduplicated, admin-hidden removed), max 12 cards
 const displayPosts = computed(()=>{
+  const hidden = new Set((live.value.hidden || []).map(normUrl))
+  const base = posts.value.filter(b=>!hidden.has(normUrl(b.url)))
   const liveMedia = live.value.media
-  if (!liveMedia.length) return posts.value
+  if (!liveMedia.length) return base
   const seen = new Set(liveMedia.map(m=>normUrl(m.url)))
-  return [...liveMedia, ...posts.value.filter(b=>!seen.has(normUrl(b.url)))].slice(0, 12)
+  return [...liveMedia, ...base.filter(b=>!seen.has(normUrl(b.url)))].slice(0, 12)
 })
 function applyLive(l){
   if (!l) return
@@ -284,6 +286,7 @@ function applyLive(l){
     if (a && a.following > 0) live.value[k].following = a.following
   }
   if (Array.isArray(l.media) && l.media.length) live.value.media = l.media
+  if (Array.isArray(l.hidden)) live.value.hidden = l.hidden
   live.value.syncedAt = l.syncedAt || null
   live.value.graph = !!l.graph
 }
@@ -308,16 +311,8 @@ watch(isAdmin, (open)=>{
   } catch {}
 })
 
-const posts = ref([
-  { display_url:'/images/post_01.jpg', caption:'Ein MIRACLE Classic 🫶🏻 Auch am Freitag 07.08. am Kirchdorfer Stadtspektakel zu hören! Stagetime: 19:00Uhr⭐️ #music #cover #scarypockets #singing #guitar', url:'https://www.instagram.com/miracleechoes/reel/DbtYTr4umA3/', date:'', type:'REEL' },
-  { display_url:'/images/post_02.jpg', caption:'Verwirrung über Verwirrung 🌪️✉️ #music #austria #songwriting #matura #artist', url:'https://www.instagram.com/miracleechoes/reel/DYEw4nsoReH/', date:'2026', type:'REEL' },
-  { display_url:'/images/post_03.jpg', caption:'Throwback zu Miracle Session Opener für @offene.buehne.kirchdorf 🫶🏻 #music #live #austria #concert #songwriting', url:'https://www.instagram.com/miracleechoes/reel/DYCn-9rIgqN/', date:'2026', type:'REEL' },
-  { display_url:'/images/post_04.jpg', caption:'Carla‘s Song (by Harry Styles) Cover💫 Mal was neues ausprobiert :) (alles was ihr hört haben wir selber aufgenommen) #singing #austria #music #guitar #harrystyles', url:'https://www.instagram.com/miracleechoes/reel/DWrOE1JiP4Y/', date:'2026', type:'REEL' },
-  { display_url:'/images/post_05.jpg', caption:'Photo shared by MIRACLE on February 27, 2026 tagging @sophie.fsdr, and @hannah_rumetshofer.', url:'https://www.instagram.com/miracleechoes/p/DVRl4IqCBFo/', date:'27.02.2026', type:'PHOTO' },
-  { display_url:'/images/post_06.jpg', caption:'Cover <3 Slow Lane - @alfiejukes_ #music #cover #singing #guitar #austria', url:'https://www.instagram.com/miracleechoes/reel/DTxaBYaCA4b/', date:'2026', type:'REEL' },
-  { display_url:'/images/post_06.jpg', caption:'the hand - @annabellesays // #singing #austria #music #guitar #cover', url:'https://www.instagram.com/miracleechoes/reel/DTCHkq6iGzl/', date:'2026', type:'REEL' },
-  { display_url:'/images/post_08.jpg', caption:'WALLS (aka. fav crash out song) Cover💜 @electricleona', url:'https://www.instagram.com/miracleechoes/reel/DMxxV1mIcAT/', date:'2026', type:'REEL' },
-])
+import { bakedPosts } from './posts.js'
+const posts = ref(bakedPosts)
 
 let lenis = null
 function go(hash){
@@ -387,9 +382,10 @@ onMounted(()=>{
   setTimeout(()=>{ if(preloader.value) gsap.set(preloader.value,{display:'none'}) }, 4000)
   gsap.set('.pre-char',{y:'100%'})
   gsap.set('.hero-char',{y:'100%'})
-  if(blob1.value) gsap.to(blob1.value,{x:12,y:-8,duration:3.5,yoyo:true,repeat:-1,ease:'sine.inOut'})
-  if(blob2.value) gsap.to(blob2.value,{x:-10,y:10,duration:2.8,yoyo:true,repeat:-1,ease:'sine.inOut',delay:0.3})
-  if(blob3.value) gsap.to(blob3.value,{x:8,y:12,duration:3.2,yoyo:true,repeat:-1,ease:'sine.inOut',delay:0.5})
+  const reducedMotion = (()=>{ try { return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) } catch(e){ return false } })()
+  if(blob1.value && !reducedMotion) gsap.to(blob1.value,{x:12,y:-8,duration:3.5,yoyo:true,repeat:-1,ease:'sine.inOut'})
+  if(blob2.value && !reducedMotion) gsap.to(blob2.value,{x:-10,y:10,duration:2.8,yoyo:true,repeat:-1,ease:'sine.inOut',delay:0.3})
+  if(blob3.value && !reducedMotion) gsap.to(blob3.value,{x:8,y:12,duration:3.2,yoyo:true,repeat:-1,ease:'sine.inOut',delay:0.5})
   } catch(e){ try { if(preloader.value) preloader.value.style.display='none' } catch(_){} }
   // disco ball - exact https://codepen.io/msaetre/pen/eYwqrb - perfect with light background
   // codepen disco ball - exact https://codepen.io/msaetre/pen/eYwqrb - no flicker (static tiles, smooth spin)
@@ -459,6 +455,13 @@ onMounted(()=>{
     return Math.floor(Math.random() * (max - min + 1)) + min;
   }
   }
+  try {
+    // perf: pause disco animations while the hero is offscreen (battery/GPU, phones)
+    var dwObs = document.getElementById('discoWrap'), dbObs = document.getElementById('discoBall')
+    if (dwObs && dbObs && 'IntersectionObserver' in window) {
+      new IntersectionObserver(function(es){ es.forEach(function(e){ dbObs.classList.toggle('paused', !e.isIntersecting) }) }, {threshold: 0}).observe(dwObs)
+    }
+  } catch(_){}
   } catch(e){}
 })
 </script>
@@ -539,6 +542,11 @@ html{width:100%;height:100%}
     0% {opacity: 1;}
     50% {opacity: 0.4;}
     100% {opacity: 1;}
+}
+/* perf: freeze disco animations while hero is offscreen (battery/GPU) */
+#discoBall.paused, #discoBall.paused * { animation-play-state: paused !important; }
+@media (prefers-reduced-motion: reduce) {
+  #discoBall, #discoBall * { animation: none !important; }
 }
 @supports not (aspect-ratio: 1/1) {
   .reel-frame { height: 420px; }

@@ -19,7 +19,7 @@
 
 ## Instagram Live-Status
 
-Der Server fragt Instagram ca. **alle 45 Minuten** automatisch ab:
+Der Server fragt Instagram automatisch ab (alle 45 Min., bei Blockade mit intelligentem Backoff bis 6 Std. — stumpfes Hämmern verlängert nur den Ban):
 
 - **Follower- & Post-Zahlen** (@miracleechoes, @hannah_rumetshofer, @sophie.fsdr) sind **immer live** — ganz ohne Einrichtung.
 - Auf der Seite steht bei den Reels ein grüner **● LIVE**-Punkt, sobald frische Daten da sind.

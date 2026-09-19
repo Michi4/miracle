@@ -45,6 +45,7 @@ export async function fetchLive(fresh = false) {
       posts: num(a.posts) || fb.posts,
       followers: num(a.followers) || fb.followers,
       following: num(a.following) || fb.following || 0,
+      manual: !!a.manual,
     }
   }
   const rawLive = ['band', 'hannah', 'sophie'].some((k) => {
@@ -68,6 +69,7 @@ export async function fetchLive(fresh = false) {
     // LIVE badge only with genuinely fresh data, never on fallbacks
     syncedAt: rawLive ? (j.syncedAt || null) : null,
     checkedAt: j.checkedAt || null,
+    hidden: Array.isArray(j.hidden) ? j.hidden : [],
   }
 }
 
@@ -106,4 +108,16 @@ export async function apiAddReel(url) {
 }
 export async function apiDeleteReel(id) {
   return req('DELETE', '/api/admin/reels/' + encodeURIComponent(id), undefined, true)
+}
+export async function apiEditReel(id, patch) {
+  return req('PUT', '/api/admin/reels/' + encodeURIComponent(id), patch, true)
+}
+export async function apiSaveStats(stats) {
+  return req('PUT', '/api/admin/stats', stats, true)
+}
+export async function apiClearStats() {
+  return req('DELETE', '/api/admin/stats', undefined, true)
+}
+export async function apiSetHidden(hidden) {
+  return req('PUT', '/api/admin/hidden', { hidden }, true)
 }
