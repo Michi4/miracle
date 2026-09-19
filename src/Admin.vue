@@ -52,6 +52,22 @@
           </div>
         </section>
 
+        <!-- ERROR LOG -->
+        <section class="bg-white border-[2.5px] border-black rounded-[24px] p-6">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div class="font-black text-lg">Fehler-Log <span class="mono text-[10px] font-normal opacity-60">(von echten Geräten gemeldet)</span></div>
+            <button v-if="clientErrors.length" @click="clearErrors" class="mono text-[11px] underline opacity-70">Leeren</button>
+          </div>
+          <div v-if="!clientErrors.length" class="mono text-xs opacity-60 mt-2">Keine Fehler gemeldet. Gut.</div>
+          <div v-else class="mt-2 flex flex-col gap-1.5 max-h-64 overflow-y-auto">
+            <div v-for="(e, i) in clientErrors" :key="e.t + i" class="mono text-[11px] leading-snug border border-black/15 rounded-lg p-2 break-words">
+              <div class="font-bold">{{ e.msg }}</div>
+              <div class="opacity-60">{{ new Date(e.t).toLocaleString('de-AT') }} • {{ e.vp }} • {{ (e.ua || '').slice(0, 70) }}</div>
+              <div v-if="e.src" class="opacity-60">{{ e.src }}</div>
+            </div>
+          </div>
+        </section>
+
         <!-- STATS -->
         <section class="bg-white border-[2.5px] border-black rounded-[24px] p-6">
           <div class="font-black text-lg">Zahlen manuell pflegen</div>
@@ -205,7 +221,7 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
-import { apiLogin, apiLogout, apiMe, apiChangePassword, apiCreateGig, apiUpdateGig, apiDeleteGig, apiTriggerSync, apiAddReel, apiDeleteReel, apiEditReel, apiSaveStats, apiClearStats, apiSetHidden, fetchGigs, fetchLive } from './api.js'
+import { apiLogin, apiLogout, apiMe, apiChangePassword, apiCreateGig, apiUpdateGig, apiDeleteGig, apiTriggerSync, apiAddReel, apiDeleteReel, apiEditReel, apiSaveStats, apiClearStats, apiSetHidden, apiErrors, apiClearErrors, fetchGigs, fetchLive } from './api.js'
 import { parseDate, startOfDay } from './gigs.js'
 import { bakedPosts } from './posts.js'
 
@@ -239,6 +255,7 @@ const reelDraft = ref({ caption: '', date: '', type: 'REEL' })
 const statsForm = ref({ band: { posts: 0, followers: 0, following: 0 }, hannah: { posts: 0, followers: 0, following: 0 }, sophie: { posts: 0, followers: 0, following: 0 } })
 const statsMsg = ref('')
 const statsOk = ref(false)
+const clientErrors = ref([])
 let statusTimer = null
 
 function isoToDe(iso) {
@@ -291,6 +308,18 @@ async function loadGigs(fresh = false) {
 async function loadStatus(fresh = false) {
   status.value = await fetchLive(fresh)
 }
+async function loadErrors() {
+  try {
+    const j = await apiErrors()
+    clientErrors.value = j.errors || []
+  } catch { /* ignore */ }
+}
+async function clearErrors() {
+  try {
+    await apiClearErrors()
+    clientErrors.value = []
+  } catch (e) { await noteAuth(e, true) }
+}
 function flashOk(msg) {
   gigError.value = ''
   gigOk.value = msg
@@ -321,7 +350,7 @@ async function doLogin() {
     const j = await apiLogin(form.value.username.trim(), form.value.password)
     user.value = j.user
     form.value.password = ''
-    await Promise.all([loadGigs(), loadStatus()])
+    await Promise.all([loadGigs(), loadStatus(), loadErrors()])
     populateStats()
     startStatusTimer()
   } catch (e) {
@@ -338,7 +367,7 @@ async function doLogout(silent) {
 }
 function startStatusTimer() {
   stopStatusTimer()
-  statusTimer = setInterval(() => { loadStatus(true).catch(() => {}) }, 60000)
+  statusTimer = setInterval(() => { loadStatus(true).catch(() => {}); loadErrors() }, 60000)
 }
 function stopStatusTimer() {
   if (statusTimer) { clearInterval(statusTimer); statusTimer = null }
@@ -530,7 +559,7 @@ onMounted(async () => {
   try {
     const j = await apiMe()
     user.value = j.user
-    await Promise.all([loadGigs(), loadStatus()])
+    await Promise.all([loadGigs(), loadStatus(), loadErrors()])
     populateStats()
     startStatusTimer()
   } catch { /* not logged in */ }

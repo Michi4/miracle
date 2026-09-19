@@ -194,3 +194,20 @@ test('reel edit + hidden: validation, auth, roundtrip', async () => {
   const { removeCustomReel: del } = await import('../reels.js')
   assert.equal(del('EDITME12345'), true)
 })
+
+test('client-error beacon: validation, auth-gated reading', async () => {
+  jar = ''
+  assert.equal((await api('GET', '/api/admin/errors')).status, 401)
+  assert.equal((await api('POST', '/api/client-error', {})).status, 400)
+  assert.equal((await api('POST', '/api/client-error', { message: 'x'.repeat(501) })).status, 400)
+  const ok = await api('POST', '/api/client-error', { message: 'Testfehler iPhone', source: 'test.js:1', href: 'https://miracle.websters.at/', vp: '390x844' })
+  assert.equal(ok.status, 200)
+  const login = await api('POST', '/api/auth/login', { username: 'sophie', password: 'neues-geheimes-pw' })
+  const csrf = login.json.csrf
+  const list = await api('GET', '/api/admin/errors')
+  assert.equal(list.status, 200)
+  assert.ok(list.json.errors.some((e) => e.msg === 'Testfehler iPhone'))
+  assert.equal((await api('DELETE', '/api/admin/errors', null, csrf)).status, 200)
+  const empty = await api('GET', '/api/admin/errors')
+  assert.equal(empty.json.errors.length, 0)
+})

@@ -54,13 +54,13 @@
     <div class="absolute text-xl opacity-[0.06] rotate-[20deg] select-none hidden md:block" style="top:42%; left:65%; animation: floatNote 11s ease-in-out infinite 1.0s;">♯</div>
   </div>
 
-  <div ref="preloader" class="fixed inset-0 z-[100] bg-[#0A0A0A] text-[#FFF8E8] flex flex-col items-center justify-center">
+  <div v-if="!safeMode" ref="preloader" class="fixed inset-0 z-[100] bg-[#0A0A0A] text-[#FFF8E8] flex flex-col items-center justify-center">
     <div class="instrument text-[22vw] lg:text-[16vw] leading-none tracking-[-0.02em] flex justify-center overflow-hidden" style="letter-spacing: -0.02em;">
       <span v-for="c in 'MIRACLE'" class="pre-char inline-block translate-y-full">{{c}}</span>
     </div>
   </div>
 
-  <nav ref="nav" class="fixed top-4 left-1/2 -translate-x-1/2 z-40 hidden md:flex items-center gap-1.5 px-2 py-2 rounded-full bg-black text-white mono text-[11px] tracking-widest opacity-0 shadow-[0_12px_40px_rgba(0,0,0,0.25)]">
+  <nav ref="nav" class="fixed top-4 left-1/2 -translate-x-1/2 z-40 hidden md:flex items-center gap-1.5 px-2 py-2 rounded-full bg-black text-white mono text-[11px] tracking-widest opacity-0 shadow-[0_12px_40px_rgba(0,0,0,0.25)]" :style="safeMode ? {opacity: 1} : null">
     <a href="#about" @click.prevent="go('#about')" :class="active==='about' ? 'bg-white text-black' : 'hover:bg-white hover:text-black'" class="px-4 py-1.5 rounded-full transition whitespace-nowrap shrink-0">{{ isDe ? 'ÜBER UNS' : 'ABOUT' }}</a>
     <a href="#music" @click.prevent="go('#music')" :class="active==='music' ? 'bg-white text-black' : 'hover:bg-white hover:text-black'" class="px-4 py-1.5 rounded-full transition whitespace-nowrap shrink-0">REELS</a>
     <a href="#live" @click.prevent="go('#live')" :class="active==='live' ? 'bg-white text-black' : 'hover:bg-white hover:text-black'" class="px-4 py-1.5 rounded-full transition whitespace-nowrap shrink-0">LIVE</a>
@@ -75,7 +75,7 @@
     <a href="https://www.instagram.com/miracleechoes/" target="_blank" aria-label="Instagram" class="bg-[#FF3B2F] w-8 h-8 grid place-items-center rounded-full shrink-0"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/></svg></a>
   </div>
 
-  <div id="discoWrap" class="absolute top-0 left-1/2 -translate-x-1/2 max-md:left-auto max-md:right-[6%] max-md:translate-x-0 z-30 pointer-events-auto flex flex-col items-center cursor-grab active:cursor-grabbing">
+  <div v-if="!safeMode" id="discoWrap" class="absolute top-0 left-1/2 -translate-x-1/2 max-md:left-auto max-md:right-[6%] max-md:translate-x-0 z-30 pointer-events-auto flex flex-col items-center cursor-grab active:cursor-grabbing">
     <div class="w-px h-[88px] bg-neutral-800/80"></div>
     <div id="discoBallLight" style="top: 88px;"></div>
     <div id="discoBall" style="top: 88px;"><div id="discoBallMiddle"></div></div>
@@ -93,7 +93,7 @@
         
 
         <h1 ref="heroTitle" class="instrument text-[21vw] sm:text-[18vw] lg:text-[15.5vw] leading-[1.2] tracking-[-0.02em] mt-3 flex flex-wrap relative overflow-visible py-3">
-          <span v-for="l in 'MIRACLE'" class="inline-block overflow-visible py-2"><span class="hero-char inline-block translate-y-full leading-[1.3] pt-1 pb-1 tracking-normal">{{l}}</span></span>
+          <span v-for="l in 'MIRACLE'" class="inline-block overflow-visible py-2"><span class="hero-char inline-block leading-[1.3] pt-1 pb-1 tracking-normal" :class="safeMode ? 'translate-y-0' : 'translate-y-full'">{{l}}</span></span>
         </h1>
 
         <!-- perfect hero cards: 2 clean cards for Hannah & Sophie + next gig ticket - all original, no 19 -->
@@ -298,6 +298,9 @@ function imgFallback(e){
 }
 // admin overlay (#/admin)
 const isAdmin = ref(false)
+// ?safe=1: pure content, zero animation libs (diagnostic fallback for troubled devices)
+const safeMode = ref(false)
+try { safeMode.value = /[?&]safe=1/.test(window.location.search) } catch { safeMode.value = false }
 function syncAdminRoute(){ try { isAdmin.value = window.location.hash === '#/admin' } catch { isAdmin.value = false } }
 function closeAdmin(){
   isAdmin.value = false
@@ -354,6 +357,7 @@ onMounted(()=>{
   }
   window.addEventListener('scroll', updateActive, {passive:true})
   updateActive()
+  if (safeMode.value) return // content only: skip Lenis, GSAP and disco entirely
   // disco ball is decorative behind everything (CSS spin only, no drag)
   // lenis
   const isMobile = window.innerWidth < 768

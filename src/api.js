@@ -121,3 +121,9 @@ export async function apiClearStats() {
 export async function apiSetHidden(hidden) {
   return req('PUT', '/api/admin/hidden', { hidden }, true)
 }
+export async function apiErrors() {
+  return req('GET', '/api/admin/errors')
+}
+export async function apiClearErrors() {
+  return req('DELETE', '/api/admin/errors', undefined, true)
+}

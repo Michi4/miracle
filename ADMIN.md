@@ -40,6 +40,11 @@ Neue Reels erscheinen **von allein**, sobald ihr den offiziellen Instagram-Zugan
 
 Ohne Token: Zahlen live, plus **Reels per Link**: im Admin bei „Reels live bringen" einfach den Instagram-Link eines neuen Posts/Reels einfügen — Text, Bild und Datum werden automatisch übernommen, das Reel steht sofort ganz oben auf der Seite. Löschen geht dort genauso (✕ → Ja).
 
+## Diagnose: Safe-Modus & Fehler-Log
+
+- Falls die Seite auf einem Gerät zickt: **https://miracle.websters.at/?safe=1** öffnen — reiner Inhalt ohne Animationen. Geht das, liegt es an einer Animations-Lib; geht das auch nicht, am Netzwerk/Gerät.
+- Der **Fehler-Log** im Admin zeigt echte Fehlermeldungen von Besucher-Geräten (Browser, Version, Viewport). Einfach die Betroffene die Seite öffnen lassen und hier nachsehen.
+
 ## Sicherheit (fürs Protokoll)
 
 - Passwörter liegen **nur als bcrypt-Hash (Kostenfaktor 12)** vor — niemals im Klartext, weder in der Datenbank noch in Logs.

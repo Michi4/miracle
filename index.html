@@ -63,6 +63,12 @@
   </head>
   <body>
     <div id="app"><h1 style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)">MIRACLE — Hannah &amp; Sophie</h1><p style="text-align:center;padding:3rem;font-family:Georgia,serif;font-size:2rem">MIRACLE lädt …</p></div>
+    <script>
+    // error beacon: runs even if the app bundle itself fails (classic script, max 3/page)
+    (function(){var n=0;function send(m,s){if(n>=3)return;n++;try{if(navigator.sendBeacon)navigator.sendBeacon('/api/client-error',JSON.stringify({message:String(m).slice(0,500),source:String(s||'').slice(0,200),href:location.href.slice(0,500),vp:innerWidth+'x'+innerHeight}))}catch(e){}}
+    window.addEventListener('error',function(e){send(e.message||'error',(e.filename||'')+':'+(e.lineno||''))});
+    window.addEventListener('unhandledrejection',function(e){var r=e.reason;send((r&&(r.message||(r.stack||r)))||'rejection','promise')});})();
+    </script>
     <script type="module" src="/src/main.js"></script>
     <noscript><p style="text-align:center;padding:2rem;font-family:sans-serif">MIRACLE — Hannah &amp; Sophie. Nächster Gig 23.08. Schlossgartenfest Kremsmünster. Folge @miracleechoes auf Instagram. (Diese Seite braucht JavaScript.)</p></noscript>
   </body>

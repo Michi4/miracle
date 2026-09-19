@@ -6,7 +6,8 @@ import express from 'express'
 import helmet from 'helmet'
 import rateLimit from 'express-rate-limit'
 import { getUserById, listGigs, insertGig, updateGig, deleteGig, seedGigsIfEmpty, countUsers, createUser, setUserPass, purgeExpiredSessions } from './store.js'
-import { gigSchema, loginSchema, passwordSchema, statsSchema, reelEditSchema, hiddenSchema } from './validate.js'
+import { gigSchema, loginSchema, passwordSchema, statsSchema, reelEditSchema, hiddenSchema, clientErrorSchema } from './validate.js'
+import { kvGet, kvSet } from './store.js'
 import { verifyLogin, openSession, readSession, closeSession, checkCsrf, hashPassword, checkPassword } from './auth.js'
 import { readCache, syncLive, startSyncLoop, mergeAccounts, getOverrides, setOverrides, clearOverrides, getHidden, setHidden } from './live.js'
 import { extractShortcode, fetchPostMeta, listCustomReels, findCustomReel, addCustomReel, removeCustomReel, editCustomReel } from './reels.js'
@@ -76,6 +77,11 @@ export function createApp() {
     windowMs: 60 * 1000, max: 60,
     standardHeaders: 'draft-7', legacyHeaders: false,
     message: { error: 'Zu viele Anfragen — kurz warten.' },
+  })
+  const errLimiter = rateLimit({
+    windowMs: 60 * 1000, max: 30,
+    standardHeaders: 'draft-7', legacyHeaders: false,
+    message: { error: 'rate limited' },
   })
   function needAuth(req, res, next) {
     const s = readSession(req)
@@ -206,6 +212,43 @@ export function createApp() {
     if (!p.success) return res.status(400).json({ error: p.error.issues[0]?.message || 'Ungültig.' })
     setHidden([...new Set(p.data.hidden)])
     res.json({ ok: true, hidden: getHidden() })
+  })
+
+  // client error beacon (no auth: must work precisely when the app is broken).
+  // Strictly rate-limited + capped, admin-only readable.
+  function readErrors() {
+    try {
+      const raw = kvGet('client_errors')
+      const arr = raw ? JSON.parse(raw) : []
+      return Array.isArray(arr) ? arr : []
+    } catch {
+      return []
+    }
+  }
+  app.post('/api/client-error', errLimiter, (req, res) => {
+    const p = clientErrorSchema.safeParse(req.body)
+    if (!p.success) return res.status(400).json({ error: 'bad payload' })
+    const ua = String(req.get('user-agent') || '').slice(0, 200)
+    const entry = {
+      t: new Date().toISOString(),
+      msg: p.data.message,
+      src: p.data.source,
+      href: p.data.href,
+      vp: p.data.vp,
+      ua,
+      ip: req.ip,
+    }
+    const arr = readErrors().filter((e) => !(e.msg === entry.msg && e.src === entry.src))
+    arr.unshift(entry)
+    kvSet('client_errors', JSON.stringify(arr.slice(0, 50)))
+    res.json({ ok: true })
+  })
+  app.get('/api/admin/errors', needAuth, (_req, res) => {
+    res.json({ errors: readErrors().slice(0, 20) })
+  })
+  app.delete('/api/admin/errors', needAuth, needCsrf, writeLimiter, (_req, res) => {
+    kvSet('client_errors', '[]')
+    res.json({ ok: true })
   })
 
   app.post('/api/admin/sync', needAuth, needCsrf, writeLimiter, async (_req, res) => {

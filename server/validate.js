@@ -53,3 +53,10 @@ export const reelEditSchema = z.object({
 export const hiddenSchema = z.object({
   hidden: z.array(z.string().trim().min(1).max(500).refine((s) => /^https:\/\/[^\s]+$/i.test(s), 'Nur https-Links.')).max(50).default([]),
 })
+
+export const clientErrorSchema = z.object({
+  message: z.string().min(1).max(500),
+  source: z.string().max(200).default(''),
+  href: z.string().max(500).default(''),
+  vp: z.string().max(20).default(''),
+})
